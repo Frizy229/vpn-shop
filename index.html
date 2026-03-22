@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { 
+            background: var(--tg-theme-bg-color, #ffffff); 
+            color: var(--tg-theme-text-color, #000000); 
+            font-family: sans-serif; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        .tariff { 
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0); 
+            border-radius: 12px; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border: 1px solid #ddd;
+        }
+        button { 
+            background: #248bed; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            width: 100%; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h2>Выбор тарифа VPN</h2>
+    
+    <div class="tariff">
+        <h3>🚀 1 Месяц</h3>
+        <p>Скорость до 1 Гбит/с</p>
+        <button onclick="sendOrder('1 месяц (300 руб)')">Выбрать за 300₽</button>
+    </div>
+
+    <div class="tariff">
+        <h3>💎 3 Месяца</h3>
+        <p>Выгода 10%</p>
+        <button onclick="sendOrder('3 месяца (800 руб)')">Выбрать за 800₽</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачивает окно на весь экран
+
+        function sendOrder(plan) {
+            // Передает данные боту и закрывает окно
+            tg.sendData(plan); 
+            tg.close();
+        }
+    </script>
+</body>
+</html>
