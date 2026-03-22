@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 15px; }
+        .key-item { background: var(--tg-theme-secondary-bg-color); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
+        input, textarea { width: 100%; padding: 8px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; background: #fff; }
+        .btn { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-del { background: #e53935; color: white; }
+        .btn-add { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
+        h3 { border-bottom: 1px solid #888; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h2>🛠 Админ-панель</h2>
+    
+    <h3>Добавить ключи</h3>
+    <textarea id="newKeys" placeholder="Вставь ключи (каждый с новой строки)"></textarea>
+    <select id="type">
+        <option value="trial">Тестовые</option>
+        <option value="pay">Платные</option>
+    </select>
+    <button class="btn btn-add" onclick="save()">Сохранить на склад</button>
+
+    <p style="font-size: 0.8em; color: gray;">* Редактирование и удаление отдельных ключей в этой версии отправляет команду боту на полную перезапись списка.</p>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function save() {
+            let val = document.getElementById('newKeys').value;
+            let type = document.getElementById('type').value;
+            if(!val) return alert("Введите ключи!");
+            
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify({
+                action: "add_bulk",
+                type: type,
+                data: val
+            }));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
