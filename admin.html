@@ -2,47 +2,71 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 15px; }
-        .key-item { background: var(--tg-theme-secondary-bg-color); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
-        input, textarea { width: 100%; padding: 8px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; background: #fff; }
-        .btn { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-del { background: #e53935; color: white; }
-        .btn-add { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
-        h3 { border-bottom: 1px solid #888; padding-bottom: 5px; }
+        body { font-family: sans-serif; background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 10px; }
+        .card { background: var(--tg-theme-secondary-bg-color); border-radius: 10px; padding: 10px; margin-bottom: 10px; border: 1px solid #555; }
+        input { width: 80%; padding: 5px; margin-bottom: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        .btn { padding: 5px 10px; border-radius: 5px; border: none; cursor: pointer; color: white; }
+        .btn-save { background: #248bed; width: 100%; padding: 10px; margin-top: 10px; font-weight: bold; }
+        .btn-del { background: #d32f2f; float: right; }
+        h3 { margin-top: 0; border-bottom: 1px solid #888; }
     </style>
 </head>
 <body>
-    <h2>🛠 Админ-панель</h2>
-    
-    <h3>Добавить ключи</h3>
-    <textarea id="newKeys" placeholder="Вставь ключи (каждый с новой строки)"></textarea>
-    <select id="type">
-        <option value="trial">Тестовые</option>
-        <option value="pay">Платные</option>
-    </select>
-    <button class="btn btn-add" onclick="save()">Сохранить на склад</button>
-
-    <p style="font-size: 0.8em; color: gray;">* Редактирование и удаление отдельных ключей в этой версии отправляет команду боту на полную перезапись списка.</p>
+    <div id="app">
+        <h3>➕ Добавить новый</h3>
+        <input type="text" id="newName" placeholder="Имя (напр. Сервер Германия)">
+        <input type="text" id="newKey" placeholder="Ключ (vless://...)">
+        <select id="newType"><option value="trial">Тест</option><option value="pay">Платный</option></select>
+        <button class="btn btn-save" onclick="addOne()">Добавить на склад</button>
+        
+        <hr>
+        <h3>📦 Текущие ключи (нажми Save для всех)</h3>
+        <div id="keyList"></div>
+        <button class="btn btn-save" onclick="sendAll()">💾 Сохранить все изменения</button>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        function save() {
-            let val = document.getElementById('newKeys').value;
-            let type = document.getElementById('type').value;
-            if(!val) return alert("Введите ключи!");
-            
-            // Отправляем данные боту
-            tg.sendData(JSON.stringify({
-                action: "add_bulk",
-                type: type,
-                data: val
-            }));
+        // Получаем текущие данные из URL (передадим их из бота)
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentData = JSON.parse(decodeURIComponent(urlParams.get('data') || '[]'));
+
+        function render() {
+            const list = document.getElementById('keyList');
+            list.innerHTML = '';
+            currentData.forEach((item, index) => {
+                list.innerHTML += `
+                    <div class="card">
+                        <button class="btn btn-del" onclick="remove(${index})">🗑</button>
+                        <b>#${index + 1} [${item.type}]</b><br>
+                        Имя: <input type="text" value="${item.name}" onchange="update(${index}, 'name', this.value)"><br>
+                        Ключ: <input type="text" value="${item.key}" onchange="update(${index}, 'key', this.value)">
+                    </div>`;
+            });
+        }
+
+        function addOne() {
+            const name = document.getElementById('newName').value;
+            const key = document.getElementById('newKey').value;
+            const type = document.getElementById('newType').value;
+            if(!key) return;
+            currentData.push({name, key, type});
+            render();
+        }
+
+        function update(i, field, val) { currentData[i][field] = val; }
+        function remove(i) { currentData.splice(i, 1); render(); }
+
+        function sendAll() {
+            tg.sendData(JSON.stringify({action: "sync_all", payload: currentData}));
             tg.close();
         }
+        render();
     </script>
 </body>
 </html>
