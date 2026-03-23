@@ -226,29 +226,30 @@
             }
         }
 
-        async function sync() {
-            tg.HapticFeedback.impactOccurred('medium');
-            try {
-                // ЗАМЕНИ НА СВОЙ IP!
-                const response = await fetch('http://146.103.118.40:8080/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        admin_id: adminId,
-                        payload: allKeys
-                    })
-                });
-
-                if (response.ok) {
-                    const t = document.getElementById('toast');
-                    t.style.display = 'block';
-                    setTimeout(() => t.style.display = 'none', 2000);
-                }
-            } catch (e) {
-                console.error(e);
-                alert('Ошибка сохранения. Проверь IP и запущен ли бот.');
-            }
+async function sync() {
+    try {
+        const response = await fetch('http://ТВОЙ_IP:8080/sync', {
+            method: 'POST',
+            // Убираем лишние заголовки, оставляем только базу
+            headers: {
+                'Content-Type': 'text/plain', // Иногда замена на text/plain помогает обойти строгий CORS
+            },
+            body: JSON.stringify({
+                admin_id: adminId,
+                payload: keys
+            })
+        });
+        
+        if (response.ok) {
+            alert("Данные успешно синхронизированы!");
+        } else {
+            alert("Ошибка сервера: " + response.status);
         }
+    } catch (error) {
+        console.error(error);
+        alert("Ошибка сети. Попробуй открыть админку в новой вкладке браузера.");
+    }
+}
 
         render();
     </script>
