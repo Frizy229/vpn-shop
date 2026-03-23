@@ -7,11 +7,13 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0c0f13;
-            --card-bg: rgba(22, 26, 31, 0.9);
-            --accent-color: #248bed;
-            --text-main: #ffffff;
-            --text-secondary: #94a3b8;
+            /* --- ОСЕННЯЯ ЦВЕТОВАЯ ПАЛИТРА --- */
+            --bg-color: #13100d; /* Глубокий темно-коричневый, как кора */
+            --card-bg: rgba(31, 26, 21, 0.9); /* Тень от сухих листьев */
+            --accent-color: #d65a2d; /* Насыщенный терракотовый / жженый оранжевый (Клен) */
+            --accent-gold: #ffcf4b; /* Яркое золото (Дуб/Осина) */
+            --text-main: #f5f0e6; /* Топленое молоко, мягкий белый */
+            --text-secondary: #b0a494; /* Приглушенный серо-коричневый */
         }
 
         * {
@@ -27,20 +29,21 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center; /* Центрируем всё по вертикали */
+            align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at center, #161d29 0%, #0c0f13 100%);
+            /* Радиальный градиент с теплым оттенком */
+            background-image: radial-gradient(circle at center, #1f1a15 0%, #13100d 100%);
         }
 
-        /* Интерактивное свечение - уменьшенный размер */
+        /* Теплое янтарное свечение - уменьшенный размер */
         .spotlight {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none;
-            /* Изменили 50% на 25% для уменьшения радиуса */
-            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(36, 139, 237, 0.12) 0%, transparent 25%);
+            /* Янтарный блик */
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 190, 80, 0.08) 0%, transparent 25%);
             z-index: 1;
         }
 
@@ -56,8 +59,9 @@
         h2 {
             font-size: clamp(26px, 5vw, 36px);
             text-align: center;
-            margin: 0 0 60px 0; /* Большой отступ снизу от заголовка */
-            background: linear-gradient(90deg, #fff, var(--accent-color));
+            margin: 0 0 60px 0;
+            /* Градиент от золотого к терракотовому */
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 900;
@@ -71,14 +75,13 @@
             justify-content: center;
         }
 
-        /* Адаптивная сетка */
         @media (max-width: 850px) {
             .cards-container { 
                 grid-template-columns: 1fr; 
                 max-width: 360px; 
                 width: 100%; 
             }
-            h2 { margin-bottom: 40px; } /* Чуть меньше отступ на мобилках */
+            h2 { margin-bottom: 40px; }
         }
         @media (min-width: 851px) {
             .cards-container { 
@@ -89,7 +92,7 @@
         .tariff-card {
             background: var(--card-bg);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 28px;
             padding: 35px 20px;
             display: flex;
@@ -101,136 +104,11 @@
         }
 
         .tariff-card:hover {
-            border-color: var(--accent-color);
+            border-color: var(--accent-gold);
             transform: translateY(-10px);
-            background: rgba(28, 34, 42, 0.95);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            background: rgba(40, 34, 28, 0.95);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
 
+        /* Выделение самых выгодных тарифов */
         .featured {
-            border: 1.5px solid var(--accent-color);
-            box-shadow: 0 0 20px rgba(36, 139, 237, 0.1);
-        }
-
-        .badge {
-            position: absolute;
-            top: -12px;
-            background: var(--accent-color);
-            color: white;
-            font-size: 10px;
-            font-weight: 900;
-            padding: 5px 14px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(36, 139, 237, 0.3);
-        }
-
-        .info h3 { margin: 0 0 10px; font-size: 22px; font-weight: 800; }
-        .info p { margin: 0; font-size: 14px; color: var(--text-secondary); }
-
-        .price-section {
-            margin-top: 30px;
-            width: 100%;
-        }
-
-        .price {
-            font-size: 30px;
-            font-weight: 900;
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        .btn-select {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 18px;
-            font-size: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
-        }
-
-        .btn-select:hover { filter: brightness(1.1); }
-        .btn-select:active { transform: scale(0.94); }
-
-    </style>
-</head>
-<body>
-
-    <div class="spotlight"></div>
-
-    <div class="main-wrapper">
-        <h2>ZAVARKA VPN</h2>
-
-        <div class="cards-container">
-            <div class="tariff-card">
-                <div class="info">
-                    <h3>🚀 1 Месяц</h3>
-                    <p>Базовый доступ</p>
-                </div>
-                <div class="price-section">
-                    <span class="price">150₽</span>
-                    <button class="btn-select" onclick="sendOrder(150, '1 месяц')">Купить</button>
-                </div>
-            </div>
-
-            <div class="tariff-card featured">
-                <div class="badge">Популярно</div>
-                <div class="info">
-                    <h3>💎 3 Месяца</h3>
-                    <p>Экономия 100₽</p>
-                </div>
-                <div class="price-section">
-                    <span class="price">350₽</span>
-                    <button class="btn-select" onclick="sendOrder(350, '3 месяца')">Купить</button>
-                </div>
-            </div>
-
-            <div class="tariff-card featured">
-                <div class="badge">Выгода -30%</div>
-                <div class="info">
-                    <h3>⚡️ 6 Месяцев</h3>
-                    <p>Лучшая цена</p>
-                </div>
-                <div class="price-section">
-                    <span class="price">600₽</span>
-                    <button class="btn-select" onclick="sendOrder(600, '6 месяцев')">Купить</button>
-                </div>
-            </div>
-
-            <div class="tariff-card">
-                <div class="info">
-                    <h3>👑 1 Год</h3>
-                    <p>Премиум навсегда</p>
-                </div>
-                <div class="price-section">
-                    <span class="price">1000₽</span>
-                    <button class="btn-select" onclick="sendOrder(1000, '1 год')">Купить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#0c0f13');
-
-        const spotlight = document.querySelector('.spotlight');
-        window.addEventListener('mousemove', e => {
-            const x = (e.clientX / window.innerWidth) * 150;
-            const y = (e.clientY / window.innerHeight) * 150;
-            spotlight.style.setProperty('--x', `${x}%`);
-            spotlight.style.setProperty('--y', `${y}%`);
-        });
-
-        function sendOrder(amount, label) {
-            tg.sendData(JSON.stringify({amount: amount, tariff: label}));
-            tg.close();
-        }
-    </script>
-</body>
-</html>
