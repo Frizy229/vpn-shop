@@ -6,32 +6,110 @@
     <title>ZAVARKA VPN Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; position: sticky; top: 0; background: #121212; z-index: 10; padding-bottom: 10px; }
-        .tab-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #222; color: #666; font-weight: bold; }
-        .tab-btn.active.trial { background: #27ae60; color: white; }
-        .tab-btn.active.pay { background: #2980b9; color: white; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #121212; 
+            color: white; 
+            padding: 15px; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
+
+        /* Контейнер для вкладок */
+        .tabs { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            position: relative; 
+            z-index: 100;
+        }
         
+        .tab-btn { 
+            flex: 1; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: none; 
+            background: #252525; 
+            color: #777; 
+            font-weight: bold; 
+            cursor: pointer;
+            pointer-events: auto; /* Явно разрешаем клики */
+        }
+        
+        .tab-btn.active.trial { background: #27ae60 !important; color: white !important; }
+        .tab-btn.active.pay { background: #2980b9 !important; color: white !important; }
+
+        /* Списки ключей */
         .key-list { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         .key-list.active { display: flex; }
-        
-        .key-item { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; }
-        .key-row { display: flex; justify-content: space-between; align-items: flex-start; }
-        .key-data { flex: 1; overflow: hidden; }
-        .key-name { font-weight: bold; color: #ffa06d; display: block; margin-bottom: 5px; }
-        .key-val { font-family: monospace; font-size: 0.8em; color: #eee; word-break: break-all; }
-        
-        .actions { display: flex; gap: 8px; margin-top: 10px; }
-        .btn-edit { background: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 6px; }
-        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; }
 
-        .add-box { background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px dashed #444; margin-top: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #252525; color: white; box-sizing: border-box; }
-        .btn-add { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; margin-top: 10px; }
+        .key-item { 
+            background: #1e1e1e; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Форма добавления */
+        .add-box { 
+            background: #1a1a1a; 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            margin-top: 10px;
+            position: relative;
+            z-index: 200; /* Самый высокий приоритет */
+            pointer-events: auto;
+        }
+
+        h3 { margin-top: 0; color: #fff; }
+
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 8px 0 15px; 
+            border-radius: 10px; 
+            border: 1px solid #333; 
+            background: #252525; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            pointer-events: auto;
+        }
+
+        .btn-add { 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 12px; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 16px;
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-appearance: none; /* Фикс для iOS */
+        }
+
         .btn-add.trial { background: #27ae60; }
         .btn-add.pay { background: #2980b9; }
-        
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; padding: 10px 20px; border-radius: 20px; display: none; }
+
+        .btn-edit { background: #f39c12; color: white; border: none; padding: 6px 10px; border-radius: 6px; margin-right: 5px; }
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 6px; }
+
+        .toast { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #27ae60; 
+            padding: 10px 20px; 
+            border-radius: 20px; 
+            display: none; 
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -59,8 +137,14 @@
         let currentTab = 'trial';
         let editIndex = -1;
 
+        // Парсим данные из URL
         const urlParams = new URLSearchParams(window.location.search);
-        allKeys = JSON.parse(decodeURIComponent(urlParams.get('data') || '[]'));
+        const dataStr = urlParams.get('data');
+        if (dataStr) {
+            try {
+                allKeys = JSON.parse(decodeURIComponent(dataStr));
+            } catch(e) { console.error("Ошибка парсинга:", e); }
+        }
         const adminId = urlParams.get('admin_id');
 
         function render() {
@@ -72,16 +156,17 @@
                 const item = document.createElement('div');
                 item.className = 'key-item';
                 item.innerHTML = `
-                    <div class="key-data">
-                        <span class="key-name">${k.name}</span>
-                        <div class="key-val">${k.key}</div>
+                    <div style="flex:1; overflow:hidden;">
+                        <span style="color:#ffa06d; font-weight:bold; display:block;">${k.name}</span>
+                        <div style="font-size:12px; color:#aaa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k.key}</div>
                     </div>
-                    <div class="actions">
-                        <button class="btn-edit" onclick="startEdit(${i})">✏️ Править</button>
-                        <button class="btn-del" onclick="removeKey(${i})">🗑 Удалить</button>
+                    <div style="display:flex;">
+                        <button class="btn-edit" onclick="startEdit(${i})">✏️</button>
+                        <button class="btn-del" onclick="removeKey(${i})">🗑</button>
                     </div>
                 `;
-                (k.type === 'trial' ? tList : pList).appendChild(item);
+                if (k.type === 'trial') tList.appendChild(item);
+                else pList.appendChild(item);
             });
             tg.expand();
         }
@@ -90,6 +175,7 @@
             currentTab = t;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('t-' + t).classList.add('active');
+            
             document.querySelectorAll('.key-list').forEach(l => l.classList.remove('active'));
             document.getElementById('list-' + t).classList.add('active');
             
@@ -105,8 +191,7 @@
             document.getElementById('inName').value = k.name;
             document.getElementById('inKey').value = k.key;
             document.getElementById('form-title').innerText = "📝 Редактировать";
-            document.getElementById('add-btn').innerText = "Обновить данные";
-            window.scrollTo(0, document.body.scrollHeight);
+            document.getElementById('add-btn').innerText = "Обновить ключ";
         }
 
         function cancelEdit() {
@@ -117,9 +202,9 @@
         }
 
         async function handleSave() {
-            const n = document.getElementById('inName').value;
-            const v = document.getElementById('inKey').value;
-            if(!n || !v) return;
+            const n = document.getElementById('inName').value.trim();
+            const v = document.getElementById('inKey').value.trim();
+            if(!n || !v) return alert('Заполни поля!');
 
             if(editIndex > -1) {
                 allKeys[editIndex].name = n;
@@ -134,42 +219,35 @@
         }
 
         async function removeKey(i) {
-            if(confirm('Удалить?')) {
+            if(confirm('Удалить этот ключ?')) {
                 allKeys.splice(i, 1);
                 await sync();
                 render();
             }
         }
 
-async function sync() {
-    tg.HapticFeedback.impactOccurred('medium');
-    
-    try {
-        // Отправляем запрос прямо на сервер (порт 8080 мы указали в main.py)
-        const response = await fetch('http://146.103.118.40:8080/sync', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                admin_id: adminId,
-                payload: allKeys
-            })
-        });
+        async function sync() {
+            tg.HapticFeedback.impactOccurred('medium');
+            try {
+                // ЗАМЕНИ НА СВОЙ IP!
+                const response = await fetch('http://ТВОЙ_IP_СЕРВЕРА:8080/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_id: adminId,
+                        payload: allKeys
+                    })
+                });
 
-        if (response.ok) {
-            // Показываем уведомление, что всё сохранилось
-            const t = document.getElementById('toast');
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 2000);
-        } else {
-            alert('Ошибка сохранения на сервере');
-        }
-    } catch (e) {
-        console.error(e);
-        alert('Не удалось связаться с сервером. Проверь, запущен ли бот и открыт ли порт 8080.');
-    }
-}
+                if (response.ok) {
+                    const t = document.getElementById('toast');
+                    t.style.display = 'block';
+                    setTimeout(() => t.style.display = 'none', 2000);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Ошибка сохранения. Проверь IP и запущен ли бот.');
+            }
         }
 
         render();
