@@ -13,6 +13,8 @@
             --accent-gold: #ffcf4b;
             --text-main: #f5f0e6;
             --text-secondary: #b0a494;
+            --skeleton-base: #1f1a15;
+            --skeleton-shine: #2a241d;
         }
 
         body {
@@ -62,6 +64,7 @@
             display: grid;
             gap: 25px;
             justify-content: center;
+            width: 100%;
         }
 
         @media (min-width: 851px) {
@@ -70,6 +73,45 @@
         @media (max-width: 850px) {
             .cards-container { grid-template-columns: 1fr; width: 100%; max-width: 360px; }
             h2 { margin-bottom: 50px; }
+        }
+
+        /* --- СТИЛИ СКЕЛЕТОНА --- */
+        #skeleton-screen {
+            display: grid;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            z-index: 10;
+        }
+
+        .skeleton-card {
+            background: var(--skeleton-base);
+            border-radius: 32px;
+            height: 380px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-card::after {
+            content: "";
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* --- СТИЛИ РЕАЛЬНЫХ КАРТОЧЕК --- */
+        #real-content {
+            display: none; /* Скрыто до загрузки */
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
         .tariff-card {
@@ -85,18 +127,18 @@
             position: relative;
         }
 
-        .tariff-card:hover {
-            border-color: var(--accent-gold);
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        .js-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
 
-        .featured { 
-            border: 2px solid var(--accent-color); 
-            background: rgba(45, 38, 30, 0.95);
+        .js-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* Стиль плашки (маркетинговый ход) */
+        .featured { border: 2px solid var(--accent-color); }
         .badge {
             position: absolute;
             top: -12px;
@@ -107,19 +149,9 @@
             padding: 6px 15px;
             border-radius: 20px;
             text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(214, 90, 45, 0.4);
-            letter-spacing: 1px;
         }
 
-        .card-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            line-height: 1.4;
-            min-height: 40px;
-        }
-
-        .price { font-size: 32px; font-weight: 900; margin: 15px 0; }
+        .price { font-size: 32px; font-weight: 900; margin: 15px 0; color: #fff; }
 
         .btn-select {
             background: var(--accent-color);
@@ -130,57 +162,86 @@
             width: 100%;
             font-weight: 800;
             cursor: pointer;
-            transition: 0.2s;
         }
-        
-        .btn-select:active { transform: scale(0.95); }
+
+        .tariff-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
     <div class="spotlight"></div>
     <div class="main-wrapper">
-        <h2>ZAVARKA VPN</h2>
-        <div class="cards-container">
-            <div class="tariff-card">
+        <h2>ZAVARKA Premium</h2>
+
+        <div id="skeleton-screen" class="cards-container">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+
+        <div id="real-content" class="cards-container">
+            <div class="tariff-card js-reveal">
                 <h3>🚀 1 Месяц</h3>
-                <div class="card-desc">Попробуйте всю мощь и скорость без ограничений</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Мощь и скорость без границ</div>
                 <div class="price">150₽</div>
                 <button class="btn-select" onclick="buy(150, '1 месяц')">Купить</button>
             </div>
-
-            <div class="tariff-card featured">
-                <div class="badge">Популярный выбор</div>
+            <div class="tariff-card featured js-reveal">
+                <div class="badge">Популярно</div>
                 <h3>💎 3 Месяца</h3>
-                <div class="card-desc">Идеальный баланс цены и комфорта. Экономия 100₽</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Баланс цены и комфорта</div>
                 <div class="price">350₽</div>
                 <button class="btn-select" onclick="buy(350, '3 месяца')">Купить</button>
             </div>
-
-            <div class="tariff-card featured">
+            <div class="tariff-card featured js-reveal">
                 <div class="badge">Лучшая цена</div>
                 <h3>⚡️ 6 Месяцев</h3>
-                <div class="card-desc">Максимальный профит для тех, кто ценит стабильность</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Максимальный профит</div>
                 <div class="price">600₽</div>
                 <button class="btn-select" onclick="buy(600, '6 месяцев')">Купить</button>
             </div>
-
-            <div class="tariff-card">
+            <div class="tariff-card js-reveal">
                 <h3>👑 1 Год</h3>
-                <div class="card-desc">Полная свобода на год. Забудьте об оплате навсегда</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Забудьте об оплате на год</div>
                 <div class="price">1000₽</div>
                 <button class="btn-select" onclick="buy(1000, '1 год')">Купить</button>
             </div>
         </div>
     </div>
+
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#13100d');
 
+        // Свечение мышки
         const spotlight = document.querySelector('.spotlight');
         window.addEventListener('mousemove', e => {
             spotlight.style.setProperty('--x', `${(e.clientX / window.innerWidth) * 100}%`);
             spotlight.style.setProperty('--y', `${(e.clientY / window.innerHeight) * 100}%`);
+        });
+
+        // Логика подмены Скелетона на Контент
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('skeleton-screen').style.display = 'none';
+                const realContent = document.getElementById('real-content');
+                realContent.style.display = 'grid';
+                
+                // Форсируем перерисовку перед анимацией
+                void realContent.offsetWidth; 
+                realContent.style.opacity = '1';
+
+                // Каскадная анимация карточек
+                const cards = document.querySelectorAll('.js-reveal');
+                cards.forEach((card, index) => {
+                    setTimeout(() => card.classList.add('active'), index * 150);
+                });
+            }, 800); // Имитация загрузки 0.8 сек для красоты эффекта
         });
 
         function buy(amount, label) {
