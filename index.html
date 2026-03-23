@@ -2,6 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="lava-verify" content="5a55bac0fe369be8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -11,9 +13,7 @@
             --accent-color: #248bed;
             --text-main: #ffffff;
             --text-secondary: #94a3b8;
-            --success: #10b981;
         }
-
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
@@ -23,18 +23,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            -webkit-user-select: none;
         }
-
-        h2 {
-            font-size: 22px;
-            text-align: center;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #fff, #248bed);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
+        h2 { font-size: 22px; text-align: center; margin-bottom: 10px; background: linear-gradient(90deg, #fff, #248bed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .tariff-card {
             background: var(--card-bg);
             border: 1px solid #2d3748;
@@ -44,72 +34,13 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
-            transition: all 0.2s ease;
         }
-
-        /* Стиль для выгодных тарифов */
-        .featured {
-            border: 1px solid var(--accent-color);
-            background: linear-gradient(145deg, #1c2127, #152b3d);
-            box-shadow: 0 4px 15px rgba(36, 139, 237, 0.15);
-        }
-
-        .badge {
-            position: absolute;
-            top: -10px;
-            right: 20px;
-            background: var(--accent-color);
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info h3 {
-            margin: 0;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .info p {
-            margin: 4px 0 0;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .price-box {
-            text-align: right;
-        }
-
-        .price {
-            display: block;
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-main);
-        }
-
-        .btn-select {
-            margin-top: 8px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100px;
-        }
-
-        .btn-select:active {
-            transform: scale(0.96);
-            opacity: 0.9;
-        }
+        .featured { border: 1px solid var(--accent-color); background: linear-gradient(145deg, #1c2127, #152b3d); }
+        .badge { position: absolute; top: -10px; right: 20px; background: var(--accent-color); color: white; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+        .info h3 { margin: 0; font-size: 18px; }
+        .info p { margin: 4px 0 0; font-size: 13px; color: var(--text-secondary); }
+        .price { font-size: 20px; font-weight: 800; }
+        .btn-select { background: var(--accent-color); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -120,8 +51,8 @@
             <h3>🚀 1 Месяц</h3>
             <p>Базовый доступ</p>
         </div>
-        <div class="price-box">
-            <span class="price">150₽</span>
+        <div style="text-align: right;">
+            <span class="price">150₽</span><br>
             <button class="btn-select" onclick="sendOrder(150, '1 месяц')">Выбрать</button>
         </div>
     </div>
@@ -132,8 +63,8 @@
             <h3>💎 3 Месяца</h3>
             <p>Экономия 100₽</p>
         </div>
-        <div class="price-box">
-            <span class="price">350₽</span>
+        <div style="text-align: right;">
+            <span class="price">350₽</span><br>
             <button class="btn-select" onclick="sendOrder(350, '3 месяца')">Выбрать</button>
         </div>
     </div>
@@ -144,8 +75,8 @@
             <h3>⚡️ 6 Месяцев</h3>
             <p>Лучшая цена</p>
         </div>
-        <div class="price-box">
-            <span class="price">600₽</span>
+        <div style="text-align: right;">
+            <span class="price">600₽</span><br>
             <button class="btn-select" onclick="sendOrder(600, '6 месяцев')">Выбрать</button>
         </div>
     </div>
@@ -155,8 +86,8 @@
             <h3>👑 1 Год</h3>
             <p>Премиум навсегда</p>
         </div>
-        <div class="price-box">
-            <span class="price">1000₽</span>
+        <div style="text-align: right;">
+            <span class="price">1000₽</span><br>
             <button class="btn-select" onclick="sendOrder(1000, '1 год')">Выбрать</button>
         </div>
     </div>
@@ -164,15 +95,8 @@
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0f1216';
-
         function sendOrder(amount, label) {
-            // Отправляем JSON-строку боту
-            const data = {
-                amount: amount,
-                tariff: label
-            };
-            tg.sendData(JSON.stringify(data));
+            tg.sendData(JSON.stringify({amount: amount, tariff: label}));
             tg.close();
         }
     </script>
