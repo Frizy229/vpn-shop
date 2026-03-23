@@ -5,7 +5,7 @@
     <meta name="lava-verify" content="5a55bac0fe369be8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <title>ZAVARKA VPN - Магазин</title>
+    <title>ZAVARKA VPN - Магазин и Кабинет</title>
     <style>
         :root {
             --bg-color: #13100d;
@@ -45,7 +45,7 @@
             padding: 20px 15px 40px; flex-grow: 1;
         }
 
-        /* --- ТАБЫ (ПЕРЕКЛЮЧАТЕЛЬ) --- */
+        /* --- ТАБЫ --- */
         .tabs-nav {
             display: flex; background: rgba(255, 255, 255, 0.05);
             border-radius: 20px; padding: 5px; margin-bottom: 30px;
@@ -60,7 +60,6 @@
 
         .tab-btn.active { background: var(--accent-color); color: white; }
 
-        /* --- СЕКЦИИ --- */
         .content-section { display: none; width: 100%; flex-direction: column; align-items: center; }
         .content-section.active { display: flex; animation: fadeIn 0.4s ease; }
 
@@ -73,24 +72,27 @@
             font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-align: center;
         }
 
-        /* --- МАГАЗИН (ТВОЯ СЕТКА) --- */
+        /* --- СЕТКА ТАРИФОВ --- */
         .cards-container {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px; width: 100%; max-width: 1100px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px; width: 100%; max-width: 1100px;
         }
 
         .tariff-card {
             background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 28px; padding: 35px 20px 25px; display: flex; flex-direction: column;
+            border-radius: 28px; padding: 30px 20px 25px; display: flex; flex-direction: column;
             align-items: center; text-align: center; position: relative; transition: 0.3s;
         }
         .js-reveal { opacity: 0; transform: translateY(20px); transition: 0.5s ease-out; }
         .js-reveal.active { opacity: 1; transform: translateY(0); }
+        
         .featured { border: 2px solid var(--accent-color); }
         .badge {
             position: absolute; top: -10px; background: var(--accent-color); color: white;
             font-size: 10px; font-weight: 900; padding: 5px 12px; border-radius: 20px; text-transform: uppercase;
         }
+
         .price { font-size: 30px; font-weight: 900; margin: 15px 0; color: #fff; }
         .btn-select {
             background: var(--accent-color); color: white; border: none; padding: 14px;
@@ -111,33 +113,38 @@
         .progress-bg { background: rgba(255, 255, 255, 0.05); height: 10px; border-radius: 5px; overflow: hidden; }
         .progress-fill { background: linear-gradient(90deg, var(--accent-gold), var(--accent-color)); height: 100%; width: 0%; transition: width 1.5s ease; }
 
-        .key-input-group { margin-top: 20px; }
-        .copy-wrapper { display: flex; gap: 8px; margin-top: 10px; }
         .key-input {
             flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--accent-gold); padding: 12px; border-radius: 14px; font-family: monospace; font-size: 12px; outline: none;
         }
         .btn-copy { background: rgba(255, 255, 255, 0.1); border: none; color: white; padding: 0 15px; border-radius: 14px; cursor: pointer; font-weight: bold; }
 
-        /* Аккордеон инструкций */
         .accordion { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 18px; margin-bottom: 10px; overflow: hidden; }
         .acc-btn { width: 100%; background: transparent; border: none; padding: 16px 20px; color: white; font-weight: bold; text-align: left; display: flex; justify-content: space-between; cursor: pointer; }
         .acc-content { padding: 0 20px; max-height: 0; overflow: hidden; transition: 0.3s ease; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
 
         /* --- СКЕЛЕТОНЫ --- */
-        #skeleton-screen { display: grid; width: 100%; }
-        .skeleton-card { background: var(--skeleton-base); border-radius: 28px; height: 350px; position: relative; overflow: hidden; }
+        #skeleton-screen { display: grid; }
+        .skeleton-card { background: var(--skeleton-base); border-radius: 28px; height: 300px; position: relative; overflow: hidden; }
         .skeleton-card::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent); animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
-        /* --- ФУТЕР И МОДАЛКИ --- */
-        footer { background: rgba(10, 8, 6, 0.98); padding: 30px 15px; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 11px; color: var(--text-secondary); text-align: center; width: 100%; }
-        .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 15px; }
-        .footer-links a { color: var(--accent-gold); text-decoration: none; font-weight: bold; padding: 5px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; padding: 10px; overflow-y: auto; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 24px; max-width: 600px; width: 100%; margin: 10px auto; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .close-modal { float: right; color: var(--accent-color); font-size: 30px; cursor: pointer; line-height: 1; }
-        .modal-body { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        /* --- ПОЛНОЦЕННЫЙ ФУТЕР --- */
+        footer {
+            background: rgba(10, 8, 6, 0.98); padding: 40px 15px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 11px; color: var(--text-secondary); text-align: center; width: 100%;
+        }
+        .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .footer-links a { color: var(--accent-gold); text-decoration: none; font-weight: bold; cursor: pointer; padding: 5px; transition: 0.2s; }
+        .footer-links a:hover { opacity: 0.8; }
+        .footer-info p { margin: 5px 0; line-height: 1.4; }
+
+        /* --- МОДАЛЬНЫЕ ОКНА --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 1000; padding: 20px; overflow-y: auto; backdrop-filter: blur(8px); }
+        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 28px; max-width: 600px; width: 100%; margin: 20px auto; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .close-modal { position: absolute; right: 20px; top: 15px; color: var(--accent-color); font-size: 32px; cursor: pointer; line-height: 1; font-weight: bold; }
+        .modal-body { font-size: 14px; color: var(--text-secondary); line-height: 1.6; text-align: left; }
+        .modal-body h3 { color: var(--accent-gold); margin-top: 0; text-transform: uppercase; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -153,9 +160,8 @@
 
         <div id="shop" class="content-section active">
             <div id="skeleton-screen" class="cards-container">
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                <div class="skeleton-card"></div><div class="skeleton-card"></div>
             </div>
 
             <div id="real-content" class="cards-container" style="display: none; opacity: 0;">
@@ -164,8 +170,7 @@
                     <div class="price">150₽</div>
                     <button class="btn-select" onclick="buy(150, '1 месяц')">Купить</button>
                 </div>
-                <div class="tariff-card featured js-reveal">
-                    <div class="badge">Популярно</div>
+                <div class="tariff-card js-reveal">
                     <h3>💎 3 Месяца</h3>
                     <div class="price">350₽</div>
                     <button class="btn-select" onclick="buy(350, '3 месяца')">Купить</button>
@@ -175,6 +180,12 @@
                     <h3>⚡️ 6 Месяцев</h3>
                     <div class="price">600₽</div>
                     <button class="btn-select" onclick="buy(600, '6 месяцев')">Купить</button>
+                </div>
+                <div class="tariff-card featured js-reveal" style="border-color: var(--accent-gold);">
+                    <div class="badge" style="background: var(--accent-gold); color: #000;">Best Value</div>
+                    <h3>👑 1 Год</h3>
+                    <div class="price">1100₽</div>
+                    <button class="btn-select" style="background: var(--accent-gold); color: #000;" onclick="buy(1100, '1 год')">Купить</button>
                 </div>
             </div>
         </div>
@@ -192,9 +203,9 @@
                     </div>
                     <div class="progress-bg"><div id="progress-bar" class="progress-fill"></div></div>
                     
-                    <div class="key-input-group">
-                        <span style="font-size: 12px; color: var(--text-secondary);">Ваш ключ:</span>
-                        <div class="copy-wrapper">
+                    <div style="margin-top: 25px;">
+                        <span style="font-size: 12px; color: var(--text-secondary);">Ваш ключ (VLESS):</span>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
                             <input type="text" id="vpn-key" class="key-input" value="vless://..." readonly>
                             <button class="btn-copy" onclick="copyKey(this)">Копия</button>
                         </div>
@@ -203,11 +214,11 @@
 
                 <div class="accordion">
                     <button class="acc-btn" onclick="toggleAcc(this)">🍏 iPhone (DefaultVPN) <span>▼</span></button>
-                    <div class="acc-content"><p>1. Установите DefaultVPN.<br>2. Скопируйте ключ.<br>3. Импортируйте через "+" и нажмите Connect.</p></div>
+                    <div class="acc-content"><p>1. Установите DefaultVPN из AppStore.<br>2. Скопируйте ключ выше.<br>3. В приложении выберите «Импорт» и вставьте ключ.<br>4. Нажмите Connect.</p></div>
                 </div>
                 <div class="accordion">
                     <button class="acc-btn" onclick="toggleAcc(this)">🤖 Android (AmneziaVPN) <span>▼</span></button>
-                    <div class="acc-content"><p>1. Установите AmneziaVPN.<br>2. Нажмите «Добавить сервер» → «Вставить из буфера».<br>3. Подключитесь.</p></div>
+                    <div class="acc-content"><p>1. Установите AmneziaVPN.<br>2. Нажмите «Добавить сервер» → «Вставить из буфера».<br>3. Нажмите кнопку подключения.</p></div>
                 </div>
             </div>
         </div>
@@ -215,23 +226,45 @@
 
     <footer>
         <div class="footer-links">
-            <a onclick="openModal('modal-offer')">Оферта</a>
-            <a onclick="openModal('modal-privacy')">Политика</a>
-            <a onclick="openModal('modal-refund')">Возврат</a>
+            <a onclick="openModal('modal-offer')">Публичная оферта</a>
+            <a onclick="openModal('modal-privacy')">Политика конфиденциальности</a>
+            <a onclick="openModal('modal-refund')">Правила возврата</a>
         </div>
-        <p>© 2026 Zavarka VPN. @vibe_24</p>
+        <div class="footer-info">
+            <p><strong>ZAVARKA VPN</strong> — Твой надежный чайный мастер в мире интернета.</p>
+            <p>Поддержка: <a href="https://t.me/vibe_24" target="_blank" style="color: var(--accent-gold); text-decoration: none;">@vibe_24</a></p>
+            <p>© 2026 ZAVARKA VPN. Все права защищены.</p>
+        </div>
     </footer>
 
-    <div id="modal-offer" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('modal-offer')">&times;</span><div class="modal-body"><h3>Оферта</h3><p>Условия предоставления услуг...</p></div></div></div>
-    <div id="modal-privacy" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('modal-privacy')">&times;</span><div class="modal-body"><h3>Политика</h3><p>Ваши данные в безопасности.</p></div></div></div>
+    <div id="modal-offer" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('modal-offer')">&times;</span>
+            <div class="modal-body">
+                <h3>Публичная оферта</h3>
+                <p>Используя сервис ZAVARKA VPN, вы соглашаетесь с тем, что сервис предоставляется «как есть». Мы обеспечиваем доступ к защищенным узлам связи. Запрещено использование сервиса для совершения противоправных действий, нарушающих законодательство вашей страны.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-privacy" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('modal-privacy')">&times;</span>
+            <div class="modal-body">
+                <h3>Политика конфиденциальности</h3>
+                <p>Мы не ведем логи вашей активности. В нашей базе данных хранятся только ваш UserID в Telegram и срок действия подписки. Мы не передаем данные третьим лицам.</p>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-refund" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('modal-refund')">&times;</span>
             <div class="modal-body">
                 <h3>Политика возврата</h3>
-                <p><strong>1. Правила:</strong> Цифровой товар возврату не подлежит...</p>
-                <p><strong>2. Комиссии:</strong> При возврате удерживается комиссия...</p>
-                <p><strong>3. Связь:</strong> @vibe_24.</p>
+                <p><strong>1. Правила:</strong> Цифровой товар возврату не подлежит, если услуга была предоставлена (ключ выдан). Возврат возможен только при технической неисправности на стороне сервиса более 24 часов.</p>
+                <p><strong>2. Комиссии:</strong> При возврате удерживается комиссия платежного шлюза (Lava и др.) и комиссия за перевод. Эти расходы лежат на Пользователе.</p>
+                <p><strong>3. Связь:</strong> По всем вопросам — @vibe_24.</p>
             </div>
         </div>
     </div>
@@ -241,18 +274,15 @@
         tg.expand();
         tg.setHeaderColor('#13100d');
 
-        // Эффект фона
         const spotlight = document.querySelector('.spotlight');
         window.addEventListener('mousemove', e => {
             spotlight.style.setProperty('--x', `${(e.clientX / window.innerWidth) * 100}%`);
             spotlight.style.setProperty('--y', `${(e.clientY / window.innerHeight) * 100}%`);
         });
 
-        // Загрузка контента и данных
         window.addEventListener('load', () => {
-            // Парсинг данных из URL (для кабинета)
             const params = new URLSearchParams(window.location.search);
-            document.getElementById('vpn-key').value = params.get('key') || "Купите подписку";
+            document.getElementById('vpn-key').value = params.get('key') || "vless://empty_key_buy_now";
             const days = parseInt(params.get('days')) || 0;
             document.getElementById('days-text').innerText = days;
             
@@ -261,11 +291,8 @@
 
             if (tg.initDataUnsafe?.user) {
                 document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
-            } else {
-                document.getElementById('user-name').innerText = "Пользователь";
             }
 
-            // Скелетоны магазина
             setTimeout(() => {
                 document.getElementById('skeleton-screen').style.display = 'none';
                 const realContent = document.getElementById('real-content');
@@ -276,18 +303,17 @@
             }, 600);
         });
 
-        // Переключение вкладок
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            
             event.currentTarget.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
 
         function copyKey(btn) {
             const input = document.getElementById('vpn-key');
-            navigator.clipboard.writeText(input.value);
+            input.select();
+            document.execCommand('copy');
             const old = btn.innerText; btn.innerText = "ОК"; btn.style.background = "#2ed573";
             setTimeout(() => { btn.innerText = old; btn.style.background = ""; }, 2000);
         }
@@ -298,9 +324,10 @@
         }
 
         function buy(amount, label) { tg.sendData(JSON.stringify({amount, tariff: label})); tg.close(); }
+        
         function openModal(id) { document.getElementById(id).style.display = 'block'; document.body.style.overflow = 'hidden'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = 'auto'; }
-
+        
         window.onclick = e => { if (e.target.className === 'modal') closeModal(e.target.id); }
     </script>
 </body>
