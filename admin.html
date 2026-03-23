@@ -6,168 +6,155 @@
     <title>ZAVARKA VPN Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; -webkit-tap-highlight-color: transparent; }
-        h2 { text-align: center; color: #d35400; margin-bottom: 20px; }
-        
-        /* Фикс кнопок: добавили z-index и относительное позиционирование */
-        .tabs { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 25px; 
-            position: relative; 
-            z-index: 999; 
-        }
-        
-        .tab-btn { 
-            flex: 1; 
-            padding: 15px; 
-            background: #252525; 
-            border: none; 
-            color: #777; 
-            cursor: pointer; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            font-size: 15px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        /* Цвета активных вкладок */
-        .tab-btn.active.trial { background: #27ae60 !important; color: white !important; }
-        .tab-btn.active.pay { background: #2980b9 !important; color: white !important; }
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; position: sticky; top: 0; background: #121212; z-index: 10; padding-bottom: 10px; }
+        .tab-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #222; color: #666; font-weight: bold; }
+        .tab-btn.active.trial { background: #27ae60; color: white; }
+        .tab-btn.active.pay { background: #2980b9; color: white; }
         
         .key-list { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         .key-list.active { display: flex; }
         
-        .key-item { 
-            background: #1e1e1e; padding: 14px; border-radius: 10px; 
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid #d35400;
-        }
-        .key-info { overflow: hidden; white-space: nowrap; }
-        .key-name { font-size: 0.8em; color: #aaa; display: block; }
-        .key-val { font-family: monospace; color: #fff; font-size: 0.9em; }
+        .key-item { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; }
+        .key-row { display: flex; justify-content: space-between; align-items: flex-start; }
+        .key-data { flex: 1; overflow: hidden; }
+        .key-name { font-weight: bold; color: #ffa06d; display: block; margin-bottom: 5px; }
+        .key-val { font-family: monospace; font-size: 0.8em; color: #eee; word-break: break-all; }
         
-        .del-btn { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 8px; }
-        
-        .add-section { 
-            margin-top: 20px; padding: 20px; background: #1a1a1a; border-radius: 15px; 
-            border: 1px solid #333; position: relative; z-index: 1;
-        }
-        input { 
-            width: 100%; padding: 14px; margin: 8px 0 18px; border-radius: 10px; 
-            border: 1px solid #333; background: #252525; color: white; box-sizing: border-box; font-size: 16px;
-        }
-        
-        .save-btn { 
-            width: 100%; padding: 16px; border: none; 
-            color: white; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1em;
-        }
-        .save-btn.trial { background: #27ae60; }
-        .save-btn.pay { background: #2980b9; }
+        .actions { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-edit { background: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 6px; }
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; }
 
-        .empty-hint { text-align: center; color: #444; padding: 20px; }
+        .add-box { background: #1a1a1a; padding: 15px; border-radius: 15px; border: 1px dashed #444; margin-top: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #252525; color: white; box-sizing: border-box; }
+        .btn-add { width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; margin-top: 10px; }
+        .btn-add.trial { background: #27ae60; }
+        .btn-add.pay { background: #2980b9; }
+        
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #27ae60; padding: 10px 20px; border-radius: 20px; display: none; }
     </style>
 </head>
 <body>
 
-    <h2>⚙️ Админ-панель</h2>
-
     <div class="tabs">
-        <button id="btn-trial" class="tab-btn active trial" onclick="showTab('trial')">🕒 Триал</button>
-        <button id="btn-pay" class="tab-btn pay" onclick="showTab('pay')">💎 Платные</button>
+        <button id="t-trial" class="tab-btn active trial" onclick="setTab('trial')">🕒 Триал</button>
+        <button id="t-pay" class="tab-btn pay" onclick="setTab('pay')">💎 Платные</button>
     </div>
 
-    <div id="trial-list" class="key-list active"></div>
-    <div id="pay-list" class="key-list"></div>
+    <div id="list-trial" class="key-list active"></div>
+    <div id="list-pay" class="key-list"></div>
 
-    <div class="add-section">
-        <h3>➕ <span id="type-label" style="color: #27ae60;">Добавить Триал</span></h3>
-        <input type="text" id="newName" placeholder="Название (напр. Финляндия)">
-        <input type="text" id="newKey" placeholder="vless://...">
-        <button id="main-save-btn" class="save-btn trial" onclick="addKey()">Добавить в Триал</button>
+    <div class="add-box">
+        <h3 id="form-title">Добавить Ключ</h3>
+        <input type="text" id="inName" placeholder="Название">
+        <input type="text" id="inKey" placeholder="vless://...">
+        <button id="add-btn" class="btn-add trial" onclick="handleSave()">Сохранить в Триал</button>
     </div>
+
+    <div id="toast" class="toast">✅ Сохранено</div>
 
     <script>
         let tg = window.Telegram.WebApp;
         let allKeys = [];
         let currentTab = 'trial';
+        let editIndex = -1;
 
-        const params = new URLSearchParams(window.location.search);
-        const rawData = params.get('data');
-        if (rawData) allKeys = JSON.parse(decodeURIComponent(rawData));
+        const urlParams = new URLSearchParams(window.location.search);
+        allKeys = JSON.parse(decodeURIComponent(urlParams.get('data') || '[]'));
+        const adminId = urlParams.get('admin_id');
 
         function render() {
-            const trialCont = document.getElementById('trial-list');
-            const payCont = document.getElementById('pay-list');
-            trialCont.innerHTML = ''; payCont.innerHTML = '';
+            const tList = document.getElementById('list-trial');
+            const pList = document.getElementById('list-pay');
+            tList.innerHTML = ''; pList.innerHTML = '';
 
-            allKeys.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'key-item';
-                div.innerHTML = `
-                    <div class="key-info"><span class="key-name">${item.name}</span><span class="key-val">${item.key.substring(0, 15)}...</span></div>
-                    <button class="del-btn" onclick="removeKey(${index})">❌</button>
+            allKeys.forEach((k, i) => {
+                const item = document.createElement('div');
+                item.className = 'key-item';
+                item.innerHTML = `
+                    <div class="key-data">
+                        <span class="key-name">${k.name}</span>
+                        <div class="key-val">${k.key}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-edit" onclick="startEdit(${i})">✏️ Править</button>
+                        <button class="btn-del" onclick="removeKey(${i})">🗑 Удалить</button>
+                    </div>
                 `;
-                if (item.type === 'trial') trialCont.appendChild(div);
-                else payCont.appendChild(div);
+                (k.type === 'trial' ? tList : pList).appendChild(item);
             });
-            if (!trialCont.innerHTML) trialCont.innerHTML = '<div class="empty-hint">Триальных ключей нет</div>';
-            if (!payCont.innerHTML) payCont.innerHTML = '<div class="empty-hint">Платных ключей нет</div>';
+            tg.expand();
         }
 
-        function showTab(type) {
-            currentTab = type;
-            console.log('Switching to:', type); // Для отладки
+        function setTab(t) {
+            currentTab = t;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('t-' + t).classList.add('active');
+            document.querySelectorAll('.key-list').forEach(l => l.classList.remove('active'));
+            document.getElementById('list-' + t).classList.add('active');
             
-            // Сброс классов
-            document.getElementById('btn-trial').classList.remove('active');
-            document.getElementById('btn-pay').classList.remove('active');
-            
-            // Активация нужной
-            document.getElementById('btn-' + type).classList.add('active');
-            
-            document.getElementById('trial-list').classList.toggle('active', type === 'trial');
-            document.getElementById('pay-list').classList.toggle('active', type === 'pay');
+            const btn = document.getElementById('add-btn');
+            btn.className = 'btn-add ' + t;
+            btn.innerText = 'Сохранить в ' + (t === 'trial' ? 'Триал' : 'Платные');
+            cancelEdit();
+        }
 
-            const label = document.getElementById('type-label');
-            const btn = document.getElementById('main-save-btn');
-            
-            if (type === 'trial') {
-                label.innerText = 'Добавить Триал';
-                label.style.color = '#27ae60';
-                btn.innerText = 'Добавить в Триал';
-                btn.className = 'save-btn trial';
+        function startEdit(i) {
+            editIndex = i;
+            const k = allKeys[i];
+            document.getElementById('inName').value = k.name;
+            document.getElementById('inKey').value = k.key;
+            document.getElementById('form-title').innerText = "📝 Редактировать";
+            document.getElementById('add-btn').innerText = "Обновить данные";
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function cancelEdit() {
+            editIndex = -1;
+            document.getElementById('inName').value = '';
+            document.getElementById('inKey').value = '';
+            document.getElementById('form-title').innerText = "Добавить Ключ";
+        }
+
+        async function handleSave() {
+            const n = document.getElementById('inName').value;
+            const v = document.getElementById('inKey').value;
+            if(!n || !v) return;
+
+            if(editIndex > -1) {
+                allKeys[editIndex].name = n;
+                allKeys[editIndex].key = v;
             } else {
-                label.innerText = 'Добавить Платный';
-                label.style.color = '#2980b9';
-                btn.innerText = 'Добавить в Платные';
-                btn.className = 'save-btn pay';
+                allKeys.push({ name: n, key: v, type: currentTab });
+            }
+            
+            await sync();
+            cancelEdit();
+            render();
+        }
+
+        async function removeKey(i) {
+            if(confirm('Удалить?')) {
+                allKeys.splice(i, 1);
+                await sync();
+                render();
             }
         }
 
-        function addKey() {
-            const name = document.getElementById('newName').value;
-            const key = document.getElementById('newKey').value;
-            if (!name || !key) return alert('Заполни поля!');
-            allKeys.push({ name, key, type: currentTab });
-            sync();
-        }
-
-        function removeKey(index) {
-            if (confirm('Удалить?')) { allKeys.splice(index, 1); sync(); }
-        }
-
-        function sync() {
+        async function sync() {
+            // Теперь мы НЕ закрываем окно, а просто уведомляем бота
+            // Если у тебя есть выделенный IP сервера, можно слать fetch на него.
+            // Но для простоты пока оставим передачу через sendData, просто НЕ будем вызывать tg.close()
             tg.sendData(JSON.stringify({ action: 'sync_all', payload: allKeys }));
-            tg.close();
+            
+            // Показываем уведомление
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+            tg.HapticFeedback.notificationOccurred('success');
         }
 
         render();
-        tg.expand();
     </script>
 </body>
 </html>
