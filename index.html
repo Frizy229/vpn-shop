@@ -9,12 +9,12 @@
     
     <style>
         :root {
-            --bg-color: #0f1216;
-            --card-bg: #1c2127;
+            --bg-color: #0c0f13;
+            --card-bg: #161a1f;
             --accent-color: #248bed;
             --text-main: #ffffff;
             --text-secondary: #94a3b8;
-            --gold: #ffcf4b;
+            --savings-color: #10b981;
         }
 
         * {
@@ -27,25 +27,52 @@
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
-            padding: 16px;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
 
-        .container {
+        /* Главный контейнер, отвечающий за расположение */
+        .grid-container {
             width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            display: grid;
+            gap: 20px;
+            justify-content: center; /* Центрирует всю сетку */
+            padding-bottom: 30px;
         }
 
+        /* --- АДАПТИВНОСТЬ: РАСПОЛОЖЕНИЕ --- */
+        
+        /* Мобильные (по умолчанию): карточки в один столбец */
+        @media (max-width: 767px) {
+            .grid-container {
+                grid-template-columns: 1fr; /* 1 колонка */
+                max-width: 400px; /* Ограничение ширины на телефоне */
+            }
+        }
+
+        /* Планшеты и ПК: карточки в одну строку по центру */
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(4, 230px); /* 4 колонки по 230px шириной */
+                align-items: stretch; /* Растягивает карточки по высоте */
+            }
+            
+            /* Смещаем заголовок вверх над сеткой */
+            h2 {
+                grid-column: 1 / -1; /* Занимает все колонки */
+                margin-bottom: 30px;
+            }
+        }
+
+        /* --- СТИЛЬ КАРТОЧЕК --- */
+
         h2 {
-            font-size: 24px;
+            font-size: 26px;
             text-align: center;
-            margin: 10px 0 20px;
+            margin: 0;
             background: linear-gradient(90deg, #fff, var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -55,31 +82,160 @@
         .tariff-card {
             background: var(--card-bg);
             border: 1px solid #2d3748;
-            border-radius: 22px;
-            padding: 20px;
+            border-radius: 24px;
+            padding: 24px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column; /* Элементы внутри карточки идут сверху вниз */
+            justify-content: space-between; /* Заголовок сверху, кнопка снизу */
             position: relative;
             transition: all 0.2s ease;
+            text-align: center;
         }
 
-        /* Маркетинговый ход: Выделение самых выгодных тарифов */
+        /* Эффект наведения (только на ПК) */
+        @media (min-width: 768px) {
+            .tariff-card:hover {
+                transform: translateY(-5px);
+                border-color: var(--accent-color);
+                box-shadow: 0 10px 30px rgba(36, 139, 237, 0.15);
+            }
+        }
+
+        /* Выделение выгодных тарифов */
         .featured {
             border: 2px solid var(--accent-color);
-            background: linear-gradient(145deg, #1c2127, #112536);
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(36, 139, 237, 0.2);
+            background: linear-gradient(145deg, #161a1f, #0f212f);
         }
 
         .badge {
             position: absolute;
             top: -12px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%); /* Точное центрирование плашки */
             background: var(--accent-color);
             color: white;
             font-size: 11px;
             font-weight: 900;
-            padding: 5px 12px;
+            padding: 5px 14px;
             border-radius: 20px;
-            text
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .info h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .info p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .price-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #2d3748;
+        }
+
+        .savings {
+            color: var(--savings-color);
+            font-size: 12px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .price {
+            font-size: 28px;
+            font-weight: 900;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .btn-select {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .btn-select:active { opacity: 0.8; transform: scale(0.96); }
+
+    </style>
+</head>
+<body>
+
+    <div class="grid-container">
+        <h2>ZAVARKA VPN Premium</h2>
+
+        <div class="tariff-card">
+            <div class="info">
+                <h3>🚀 1 Месяц</h3>
+                <p>Базовый доступ</p>
+            </div>
+            <div class="price-section">
+                <span class="price">150₽</span>
+                <button class="btn-select" onclick="sendOrder(150, '1 месяц')">Купить</button>
+            </div>
+        </div>
+
+        <div class="tariff-card featured">
+            <div class="badge">Выбор сезона</div>
+            <div class="info">
+                <h3>💎 3 Месяца</h3>
+                <p>Безлимит на 90 дней</p>
+            </div>
+            <div class="price-section">
+                <span class="savings">Экономия 100₽</span>
+                <span class="price">350₽</span>
+                <button class="btn-select" onclick="sendOrder(350, '3 месяца')">Купить</button>
+            </div>
+        </div>
+
+        <div class="tariff-card featured">
+            <div class="badge">🔥 Выгода -30%</div>
+            <div class="info">
+                <h3>⚡️ 6 Месяцев</h3>
+                <p>Лучшая цена</p>
+            </div>
+            <div class="price-section">
+                <span class="savings">Выгода про-уровня</span>
+                <span class="price">600₽</span>
+                <button class="btn-select" onclick="sendOrder(600, '6 месяцев')">Купить</button>
+            </div>
+        </div>
+
+        <div class="tariff-card">
+            <div class="info">
+                <h3>👑 1 Год</h3>
+                <p>Забыть об оплате</p>
+            </div>
+            <div class="price-section">
+                <span class="price">1000₽</span>
+                <button class="btn-select" onclick="sendOrder(1000, '1 год')">Купить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#0c0f13');
+
+        function sendOrder(amount, label) {
+            tg.sendData(JSON.stringify({amount: amount, tariff: label}));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
