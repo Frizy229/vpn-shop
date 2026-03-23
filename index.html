@@ -5,7 +5,7 @@
     <meta name="lava-verify" content="5a55bac0fe369be8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <title>ZAVARKA VPN - Магазин</title>
+    <title>ZAVARKA VPN - Приложение</title>
     <style>
         :root {
             --bg-color: #13100d;
@@ -18,231 +18,136 @@
             --skeleton-shine: #2a241d;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Жесткий запрет горизонтального скролла */
-            background-color: var(--bg-color);
+            width: 100%; height: 100%; margin: 0; padding: 0;
+            overflow-x: hidden; background-color: var(--bg-color);
         }
 
         body {
             color: var(--text-main);
             font-family: -apple-system, system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            display: flex; flex-direction: column; min-height: 100vh;
             background-image: radial-gradient(circle at center, #1f1a15 0%, #13100d 100%);
         }
 
         .spotlight {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none;
             background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 190, 80, 0.06) 0%, transparent 15%);
             z-index: 1;
         }
 
-        /* Контейнер по центру */
         .main-wrapper {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 1200px; /* Ограничение для десктопов */
-            margin: auto;      /* Центрирование */
-            padding: 40px 15px;
-            flex-grow: 1;
+            position: relative; z-index: 2; display: flex; flex-direction: column;
+            align-items: center; width: 100%; max-width: 1200px; margin: 0 auto;
+            padding: 40px 15px; flex-grow: 1;
         }
 
         h2 {
-            font-size: clamp(24px, 8vw, 40px); /* Резиновый шрифт */
-            margin: 0 0 40px 0;
+            font-size: clamp(24px, 8vw, 36px); margin: 0 0 25px 0;
             background: linear-gradient(90deg, var(--accent-gold), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-align: center;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-align: center;
         }
 
-        /* Умная сетка карточек */
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1100px;
-            padding: 10px 0;
+        /* --- ВКЛАДКИ (ТАБЫ) --- */
+        .tabs-container {
+            display: flex; background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px; padding: 5px; margin-bottom: 30px;
+            width: 100%; max-width: 400px;
         }
 
-        /* --- СКЕЛЕТОН --- */
-        #skeleton-screen {
-            display: grid;
-            width: 100%;
+        .tab-btn {
+            flex: 1; padding: 12px; border: none; background: transparent;
+            color: var(--text-secondary); font-weight: bold; border-radius: 15px;
+            cursor: pointer; transition: 0.3s; font-size: 14px;
         }
 
-        .skeleton-card {
-            background: var(--skeleton-base);
-            border-radius: 28px;
-            height: 350px;
-            position: relative;
-            overflow: hidden;
-        }
+        .tab-btn.active { background: var(--accent-color); color: white; }
 
-        .skeleton-card::after {
-            content: "";
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
-            animation: shimmer 1.5s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        #real-content {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        /* --- КАРТОЧКИ --- */
-        .tariff-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 28px;
-            padding: 35px 20px 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-            position: relative;
-        }
-
-        .js-reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-
-        .js-reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .featured { border: 2px solid var(--accent-color); }
+        /* --- СЕКЦИИ --- */
+        .section { display: none; width: 100%; animation: fadeIn 0.4s ease; }
+        .section.active { display: flex; flex-direction: column; align-items: center; }
         
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- МАГАЗИН --- */
+        .cards-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px; width: 100%; max-width: 1100px;
+        }
+
+        .tariff-card {
+            background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 28px; padding: 35px 20px 25px; display: flex; flex-direction: column;
+            align-items: center; text-align: center; position: relative;
+        }
+        .featured { border: 2px solid var(--accent-color); }
         .badge {
-            position: absolute;
-            top: -10px;
-            background: var(--accent-color);
-            color: white;
-            font-size: 10px;
-            font-weight: 900;
-            padding: 5px 12px;
-            border-radius: 20px;
-            text-transform: uppercase;
+            position: absolute; top: -10px; background: var(--accent-color); color: white;
+            font-size: 10px; font-weight: 900; padding: 5px 12px; border-radius: 20px; text-transform: uppercase;
         }
-
         .price { font-size: 30px; font-weight: 900; margin: 15px 0; color: #fff; }
-
         .btn-select {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 18px;
-            width: 100%;
-            font-weight: 800;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
+            background: var(--accent-color); color: white; border: none; padding: 14px;
+            border-radius: 18px; width: 100%; font-weight: 800; cursor: pointer;
         }
 
-        .btn-select:active { transform: scale(0.96); }
+        /* --- КАБИНЕТ --- */
+        .profile-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .profile-card {
+            background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px; padding: 25px;
+        }
+        
+        .profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .profile-name { font-size: 20px; font-weight: bold; color: var(--accent-gold); }
+        .profile-status { background: rgba(46, 213, 115, 0.2); color: #2ed573; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        
+        .progress-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+        .progress-bg { background: rgba(255, 255, 255, 0.1); height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, var(--accent-gold), var(--accent-color)); height: 100%; border-radius: 4px; transition: width 1s ease-out; }
+
+        .key-title { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--text-secondary); }
+        .copy-wrapper { display: flex; gap: 10px; }
+        .key-input {
+            flex: 1; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--accent-gold); padding: 12px 15px; border-radius: 14px; font-family: monospace;
+            font-size: 13px; outline: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; padding: 0 20px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-copy:active { background: var(--accent-color); }
+
+        /* Инструкции (Аккордеон) */
+        .instructions-title { font-size: 18px; font-weight: bold; margin: 10px 0; text-align: center; }
+        .accordion {
+            background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px; margin-bottom: 10px; overflow: hidden;
+        }
+        .acc-btn {
+            width: 100%; background: transparent; border: none; padding: 15px 20px;
+            color: white; font-size: 15px; font-weight: bold; text-align: left; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .acc-content { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .acc-content p { margin-bottom: 15px; }
+        .acc-content a { color: var(--accent-gold); text-decoration: none; }
 
         /* --- ФУТЕР --- */
         footer {
-            background: rgba(10, 8, 6, 0.98);
-            padding: 30px 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-align: center;
-            width: 100%;
+            background: rgba(10, 8, 6, 0.98); padding: 30px 15px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 11px; color: var(--text-secondary); text-align: center; width: 100%;
         }
-
-        .footer-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .footer-links a {
-            color: var(--accent-gold);
-            text-decoration: none;
-            font-weight: bold;
-            padding: 5px;
-        }
-
+        .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 15px; }
+        .footer-links a { color: var(--accent-gold); text-decoration: none; font-weight: bold; padding: 5px; }
         .footer-info p { margin: 4px 0; line-height: 1.4; }
 
-        /* --- МОДАЛКИ (Адаптивные) --- */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 100;
-            padding: 10px;
-            overflow-y: auto;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 24px;
-            max-width: 600px;
-            width: 100%;
-            margin: 10px auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .close-modal {
-            float: right;
-            color: var(--accent-color);
-            font-size: 30px;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .modal-body { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
-        .modal-body h3 { color: var(--accent-gold); font-size: 16px; margin-top: 0; }
-        .modal-body p { margin-bottom: 12px; }
-
-        /* Фикс для очень маленьких экранов (iPhone 5/SE) */
-        @media (max-width: 320px) {
-            .cards-container { grid-template-columns: 1fr; }
-            .tariff-card { padding: 25px 15px; }
-        }
     </style>
 </head>
 <body>
@@ -251,95 +156,116 @@
     <div class="main-wrapper">
         <h2>ZAVARKA VPN</h2>
 
-        <div id="skeleton-screen" class="cards-container">
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('shop')">🛒 Магазин</button>
+            <button class="tab-btn" onclick="switchTab('profile')">👤 Кабинет</button>
         </div>
 
-        <div id="real-content" class="cards-container">
-            <div class="tariff-card js-reveal">
-                <h3>🚀 1 Месяц</h3>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Мощь и скорость</div>
-                <div class="price">150₽</div>
-                <button class="btn-select" onclick="buy(150, '1 месяц')">Купить</button>
+        <div id="shop" class="section active">
+            <div class="cards-container">
+                <div class="tariff-card">
+                    <h3>🚀 1 Месяц</h3>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Мощь и скорость</div>
+                    <div class="price">150₽</div>
+                    <button class="btn-select" onclick="buy(150, '1 месяц')">Купить</button>
+                </div>
+                <div class="tariff-card featured">
+                    <div class="badge">Популярно</div>
+                    <h3>💎 3 Месяца</h3>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Баланс комфорта</div>
+                    <div class="price">350₽</div>
+                    <button class="btn-select" onclick="buy(350, '3 месяца')">Купить</button>
+                </div>
+                <div class="tariff-card featured">
+                    <div class="badge">Лучшая цена</div>
+                    <h3>⚡️ 6 Месяцев</h3>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Максимальный профит</div>
+                    <div class="price">600₽</div>
+                    <button class="btn-select" onclick="buy(600, '6 месяцев')">Купить</button>
+                </div>
             </div>
-            <div class="tariff-card featured js-reveal">
-                <div class="badge">Популярно</div>
-                <h3>💎 3 Месяца</h3>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Баланс комфорта</div>
-                <div class="price">350₽</div>
-                <button class="btn-select" onclick="buy(350, '3 месяца')">Купить</button>
-            </div>
-            <div class="tariff-card featured js-reveal">
-                <div class="badge">Лучшая цена</div>
-                <h3>⚡️ 6 Месяцев</h3>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Максимальный профит</div>
-                <div class="price">600₽</div>
-                <button class="btn-select" onclick="buy(600, '6 месяцев')">Купить</button>
-            </div>
-            <div class="tariff-card js-reveal">
-                <h3>👑 1 Год</h3>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Беззаботный доступ</div>
-                <div class="price">1000₽</div>
-                <button class="btn-select" onclick="buy(1000, '1 год')">Купить</button>
+        </div>
+
+        <div id="profile" class="section">
+            <div class="profile-container">
+                
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-name" id="user-name">Гость</div>
+                        <div class="profile-status">Активен</div>
+                    </div>
+                    
+                    <div class="progress-info">
+                        <span>Осталось дней: <strong style="color: white;">14</strong></span>
+                        <span>из 30</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: 46%;"></div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <div class="key-title">Ваш ключ доступа:</div>
+                    <div class="copy-wrapper">
+                        <input type="text" id="vpn-key" class="key-input" value="vless://b0b8...1f12@192.168.1.1:443?type=tcp&security=reality" readonly>
+                        <button class="btn-copy" onclick="copyKey()" id="copy-btn">Копия</button>
+                    </div>
+                </div>
+
+                <div class="instructions-title">Как подключить?</div>
+                
+                <div class="accordion">
+                    <button class="acc-btn" onclick="toggleAcc(this)">🍏 Инструкция для iOS (iPhone) <span>▼</span></button>
+                    <div class="acc-content">
+                        <p>1. Скачайте бесплатное приложение <strong>DefaultVPN</strong> из AppStore.</p>
+                        <p>2. Скопируйте ваш ключ доступа выше.</p>
+                        <p>3. Откройте приложение, нажмите добавить конфигурацию (значок "+" или "Импорт") и вставьте скопированный ключ.</p>
+                        <p>4. Включите тумблер или нажмите кнопку подключения. Готово!</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn" onclick="toggleAcc(this)">🤖 Инструкция для Android <span>▼</span></button>
+                    <div class="acc-content">
+                        <p>1. Скачайте бесплатное приложение <strong>AmneziaVPN</strong> из Google Play.</p>
+                        <p>2. Скопируйте ваш ключ доступа в личном кабинете.</p>
+                        <p>3. Откройте приложение, выберите пункт «Добавить сервер» (или нажмите на плюсик) и выберите «Вставить конфигурацию из буфера обмена».</p>
+                        <p>4. Нажмите большую кнопку подключения на главном экране.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="acc-btn" onclick="toggleAcc(this)">💻 Инструкция для Windows <span>▼</span></button>
+                    <div class="acc-content">
+                        <p>1. Скачайте клиент <strong>v2rayN</strong> (Core) с GitHub или официального сайта.</p>
+                        <p>2. Распакуйте архив и запустите v2rayN.exe.</p>
+                        <p>3. Скопируйте ключ, перейдите в программу и нажмите `Ctrl+V` (вставить).</p>
+                        <p>4. Кликните правой кнопкой мыши по иконке приложения в трее и выберите "Set system proxy".</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <footer>
-        <div class="footer-links">
-            <a onclick="openModal('modal-offer')">Оферта</a>
-            <a onclick="openModal('modal-privacy')">Политика</a>
-            <a onclick="openModal('modal-refund')">Возврат</a>
-        </div>
         <div class="footer-info">
             <p><strong>ZAVARKA VPN</strong> — анонимность и скорость.</p>
-            <p>Поддержка: @vibe_24 | support@zavarkavpn.com</p>
-            <p>© 2026 Zavarka VPN. Все права защищены.</p>
+            <p>Поддержка: @vibe_24 | © 2026</p>
         </div>
     </footer>
-
-    <div id="modal-offer" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal-offer')">&times;</span>
-            <div class="modal-body">
-                <h3>Публичная оферта</h3>
-                <p><strong>1. Общие положения:</strong> Настоящий документ является публичной офертой сервиса ZAVARKA VPN. Оплата услуг Пользователем является полным акцептом данного договора.</p>
-                <p><strong>2. Предмет:</strong> Исполнитель предоставляет доступ к VPN-серверам на срок оплаченного тарифа. Услуга считается оказанной в момент передачи ключа в Telegram.</p>
-                <p><strong>3. Обязанности:</strong> Исполнитель гарантирует аптайм 99%. Пользователь обязуется не нарушать закон через сеть Исполнителя.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-privacy" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal-privacy')">&times;</span>
-            <div class="modal-body">
-                <h3>Политика конфиденциальности</h3>
-                <p><strong>1. Данные:</strong> Мы собираем только ваш Telegram ID для работы подписки. Мы не храним логи вашего трафика (No-Logs Policy).</p>
-                <p><strong>2. Безопасность:</strong> Все данные зашифрованы и не передаются третьим лицам.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-refund" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal-refund')">&times;</span>
-            <div class="modal-body">
-                <h3>Политика возврата</h3>
-                <p><strong>1. Правила:</strong> Цифровой товар возврату не подлежит, если услуга была предоставлена (ключ выдан). Возврат возможен только при технической неисправности на стороне сервиса более 24 часов.</p>
-                <p><strong>2. Комиссии:</strong> При возврате удерживается комиссия платежного шлюза (Lava и др.) и комиссия за перевод. Эти расходы лежат на Пользователе.</p>
-                <p><strong>3. Связь:</strong> По всем вопросам — @vibe_24.</p>
-            </div>
-        </div>
-    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#13100d');
+
+        // Подхватываем имя пользователя из Telegram
+        document.addEventListener("DOMContentLoaded", () => {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+            }
+        });
 
         const spotlight = document.querySelector('.spotlight');
         window.addEventListener('mousemove', e => {
@@ -347,40 +273,58 @@
             spotlight.style.setProperty('--y', `${(e.clientY / window.innerHeight) * 100}%`);
         });
 
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('skeleton-screen').style.display = 'none';
-                const realContent = document.getElementById('real-content');
-                realContent.style.display = 'grid';
-                void realContent.offsetWidth; 
-                realContent.style.opacity = '1';
+        // Логика переключения вкладок
+        function switchTab(tabId) {
+            // Сбрасываем активные кнопки
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            // Скрываем все секции
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            
+            // Активируем нужные
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
 
-                const cards = document.querySelectorAll('.js-reveal');
-                cards.forEach((card, index) => {
-                    setTimeout(() => card.classList.add('active'), index * 100);
-                });
-            }, 600);
-        });
+        // Логика копирования ключа
+        function copyKey() {
+            const keyInput = document.getElementById('vpn-key');
+            const btn = document.getElementById('copy-btn');
+            
+            keyInput.select();
+            keyInput.setSelectionRange(0, 99999); // Для мобилок
+            navigator.clipboard.writeText(keyInput.value).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "Готово!";
+                btn.style.background = "#2ed573"; // Зеленый цвет успеха
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "rgba(255, 255, 255, 0.1)";
+                }, 2000);
+            });
+        }
+
+        // Логика аккордеона инструкций
+        function toggleAcc(btn) {
+            const content = btn.nextElementSibling;
+            const span = btn.querySelector('span');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                span.style.transform = "rotate(0deg)";
+            } else {
+                // Закрываем другие
+                document.querySelectorAll('.acc-content').forEach(c => c.style.maxHeight = null);
+                document.querySelectorAll('.acc-btn span').forEach(s => s.style.transform = "rotate(0deg)");
+                
+                content.style.maxHeight = content.scrollHeight + "px";
+                span.style.transform = "rotate(180deg)";
+            }
+        }
 
         function buy(amount, label) {
             tg.sendData(JSON.stringify({amount: amount, tariff: label}));
             tg.close();
-        }
-
-        function openModal(id) {
-            document.getElementById(id).style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        window.onclick = function(event) {
-            if (event.target.className === 'modal') {
-                event.target.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
         }
     </script>
 </body>
