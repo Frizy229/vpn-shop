@@ -6,49 +6,52 @@
     <title>ZAVARKA VPN Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; margin: 0; }
-        h2 { text-align: center; color: #d35400; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; sticky: top; }
-        .tab-btn { 
-            flex: 1; padding: 12px; background: #333; border: none; 
-            color: #888; cursor: pointer; border-radius: 10px; font-weight: bold; transition: 0.3s;
-        }
-        .tab-btn.active { background: #d35400; color: white; box-shadow: 0 4px 15px rgba(211, 84, 0, 0.3); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
+        h2 { text-align: center; color: #d35400; margin-bottom: 25px; }
         
-        .key-list { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; max-height: 300px; overflow-y: auto; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { 
+            flex: 1; padding: 14px; background: #252525; border: none; 
+            color: #777; cursor: pointer; border-radius: 12px; font-weight: bold; transition: all 0.2s ease;
+        }
+        .tab-btn.active.trial { background: #27ae60; color: white; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); }
+        .tab-btn.active.pay { background: #2980b9; color: white; box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3); }
+        
+        .key-list { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         .key-list.active { display: flex; }
         
         .key-item { 
-            background: #2c2c2c; padding: 12px; border-radius: 8px; 
+            background: #1e1e1e; padding: 14px; border-radius: 10px; 
             display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid #d35400; animation: fadeIn 0.3s ease;
+            border-left: 4px solid #d35400;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        .key-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 10px; }
-        .key-name { font-size: 0.8em; color: #ffa06d; display: block; margin-bottom: 2px; }
-        .key-val { font-family: monospace; color: #fff; font-size: 0.9em; }
+        .key-info { overflow: hidden; white-space: nowrap; }
+        .key-name { font-size: 0.85em; color: #aaa; display: block; }
+        .key-val { font-family: monospace; color: #fff; font-size: 0.95em; }
         
-        .del-btn { background: #c0392b; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .del-btn { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
         
         .add-section { 
-            margin-top: 20px; padding: 15px; background: #222; border-radius: 12px; 
-            border: 1px solid #333; box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            margin-top: 30px; padding: 20px; background: #1a1a1a; border-radius: 15px; 
+            border: 1px solid #333;
         }
-        .add-section h3 { margin-top: 0; font-size: 1.1em; color: #27ae60; }
+        .add-section h3 { margin: 0 0 15px 0; font-size: 1.1em; }
+        .type-indicator { font-size: 0.8em; padding: 4px 8px; border-radius: 5px; margin-left: 10px; vertical-align: middle; }
         
-        input, select { 
-            width: 100%; padding: 12px; margin: 5px 0 15px; border-radius: 8px; 
-            border: 1px solid #444; background: #333; color: white; box-sizing: border-box; outline: none;
+        input { 
+            width: 100%; padding: 14px; margin: 8px 0 18px; border-radius: 10px; 
+            border: 1px solid #333; background: #252525; color: white; box-sizing: border-box; font-size: 16px;
         }
-        input:focus { border-color: #d35400; }
+        input:focus { border-color: #d35400; outline: none; }
         
         .save-btn { 
-            width: 100%; padding: 15px; background: #27ae60; border: none; 
-            color: white; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1em;
+            width: 100%; padding: 16px; background: #d35400; border: none; 
+            color: white; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1em;
         }
-        .save-btn:active { transform: scale(0.98); }
-        .empty-hint { text-align: center; color: #555; padding: 20px; font-style: italic; }
+        .save-btn.trial { background: #27ae60; }
+        .save-btn.pay { background: #2980b9; }
+
+        .empty-hint { text-align: center; color: #444; padding: 20px; }
     </style>
 </head>
 <body>
@@ -56,28 +59,23 @@
     <h2>⚙️ Админ-панель</h2>
 
     <div class="tabs">
-        <button id="btn-trial" class="tab-btn active" onclick="showTab('trial')">🕒 Триал</button>
-        <button id="btn-pay" class="tab-btn" onclick="showTab('pay')">💎 Платные</button>
+        <button id="btn-trial" class="tab-btn active trial" onclick="showTab('trial')">🕒 Триал</button>
+        <button id="btn-pay" class="tab-btn pay" onclick="showTab('pay')">💎 Платные</button>
     </div>
 
     <div id="trial-list" class="key-list active"></div>
     <div id="pay-list" class="key-list"></div>
 
     <div class="add-section">
-        <h3 id="form-title">➕ Добавить Триал-ключ</h3>
+        <h3>➕ Добавить <span id="type-label" style="color: #27ae60;">Триал-ключ</span></h3>
         
-        <label>Название (для тебя):</label>
-        <input type="text" id="newName" placeholder="Напр: Стокгольм 1">
+        <label>Название:</label>
+        <input type="text" id="newName" placeholder="Напр: Германия #1">
         
-        <label>Ключ (vless://...):</label>
-        <input type="text" id="newKey" placeholder="Вставь ссылку">
+        <label>Ключ:</label>
+        <input type="text" id="newKey" placeholder="vless://...">
         
-        <select id="newType" style="display: none;">
-            <option value="trial">trial</option>
-            <option value="pay">pay</option>
-        </select>
-        
-        <button class="save-btn" onclick="addKey()">Сохранить и Синхронизировать</button>
+        <button id="main-save-btn" class="save-btn trial" onclick="addKey()">Добавить в Триал</button>
     </div>
 
     <script>
@@ -85,23 +83,21 @@
         let allKeys = [];
         let currentTab = 'trial';
 
+        // Загрузка данных
         const params = new URLSearchParams(window.location.search);
         const rawData = params.get('data');
-        if (rawData) {
-            allKeys = JSON.parse(decodeURIComponent(rawData));
-        }
+        if (rawData) allKeys = JSON.parse(decodeURIComponent(rawData));
 
         function render() {
             const trialCont = document.getElementById('trial-list');
             const payCont = document.getElementById('pay-list');
-            trialCont.innerHTML = '';
-            payCont.innerHTML = '';
+            trialCont.innerHTML = ''; payCont.innerHTML = '';
 
             const trials = allKeys.filter(k => k.type === 'trial');
             const pays = allKeys.filter(k => k.type === 'pay');
 
-            if (trials.length === 0) trialCont.innerHTML = '<div class="empty-hint">Список триалов пуст</div>';
-            if (pays.length === 0) payCont.innerHTML = '<div class="empty-hint">Платных ключей нет</div>';
+            if (!trials.length) trialCont.innerHTML = '<div class="empty-hint">Триальных ключей нет</div>';
+            if (!pays.length) payCont.innerHTML = '<div class="empty-hint">Платных ключей нет</div>';
 
             allKeys.forEach((item, index) => {
                 const div = document.createElement('div');
@@ -109,7 +105,7 @@
                 div.innerHTML = `
                     <div class="key-info">
                         <span class="key-name">${item.name}</span>
-                        <span class="key-val">${item.key.substring(0, 25)}...</span>
+                        <span class="key-val">${item.key.substring(0, 20)}...</span>
                     </div>
                     <button class="del-btn" onclick="removeKey(${index})">❌</button>
                 `;
@@ -120,52 +116,30 @@
 
         function showTab(type) {
             currentTab = type;
-            // Обновляем кнопки
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + type).classList.add('active');
             
-            // Обновляем списки
-            document.querySelectorAll('.key-list').forEach(l => l.classList.remove('active'));
-            document.getElementById(type + '-list').classList.add('active');
+            // Переключаем кнопки вкладок
+            document.getElementById('btn-trial').classList.toggle('active', type === 'trial');
+            document.getElementById('btn-pay').classList.toggle('active', type === 'pay');
+            
+            // Переключаем списки
+            document.getElementById('trial-list').classList.toggle('active', type === 'trial');
+            document.getElementById('pay-list').classList.toggle('active', type === 'pay');
 
-            // САМОЕ ВАЖНОЕ: Меняем тип в скрытом селекте и заголовок формы
-            document.getElementById('newType').value = type;
-            document.getElementById('form-title').innerText = type === 'trial' ? '➕ Добавить Триал-ключ' : '➕ Добавить Платный ключ';
-            document.getElementById('form-title').style.color = type === 'trial' ? '#27ae60' : '#3498db';
-        }
-
-        function addKey() {
-            const name = document.getElementById('newName').value;
-            const key = document.getElementById('newKey').value;
-            const type = document.getElementById('newType').value;
-
-            if (!name || !key) {
-                tg.HapticFeedback.notificationOccurred('error');
-                return alert('Заполни поля!');
-            }
-
-            allKeys.push({ name, key, type });
-            sync();
-        }
-
-        function removeKey(index) {
-            if(confirm('Удалить этот ключ?')) {
-                allKeys.splice(index, 1);
-                sync();
+            // Обновляем форму добавления
+            const label = document.getElementById('type-label');
+            const btn = document.getElementById('main-save-btn');
+            
+            if (type === 'trial') {
+                label.innerText = 'Триал-ключ';
+                label.style.color = '#27ae60';
+                btn.innerText = 'Добавить в Триал';
+                btn.className = 'save-btn trial';
+            } else {
+                label.innerText = 'Платный ключ';
+                label.style.color = '#2980b9';
+                btn.innerText = 'Добавить в Платные';
+                btn.className = 'save-btn pay';
             }
         }
 
-        function sync() {
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.sendData(JSON.stringify({
-                action: 'sync_all',
-                payload: allKeys
-            }));
-            tg.close();
-        }
-
-        render();
-        tg.expand();
-    </script>
-</body>
-</html>
+        function addKey
