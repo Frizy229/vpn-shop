@@ -163,7 +163,7 @@
     <div class="spotlight"></div>
 
     <div class="main-wrapper">
-        <h2>ZAVARKA Premium</h2>
+        <h2>ZAVARKA VPN</h2>
 
         <div class="cards-container">
             <div class="tariff-card">
@@ -221,8 +221,8 @@
 
         const spotlight = document.querySelector('.spotlight');
         window.addEventListener('mousemove', e => {
-            const x = (e.clientX / window.innerWidth) * 100;
-            const y = (e.clientY / window.innerHeight) * 100;
+            const x = (e.clientX / window.innerWidth) * 150;
+            const y = (e.clientY / window.innerHeight) * 150;
             spotlight.style.setProperty('--x', `${x}%`);
             spotlight.style.setProperty('--y', `${y}%`);
         });
