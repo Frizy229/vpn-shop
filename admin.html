@@ -141,17 +141,35 @@
             }
         }
 
-        async function sync() {
-            // Теперь мы НЕ закрываем окно, а просто уведомляем бота
-            // Если у тебя есть выделенный IP сервера, можно слать fetch на него.
-            // Но для простоты пока оставим передачу через sendData, просто НЕ будем вызывать tg.close()
-            tg.sendData(JSON.stringify({ action: 'sync_all', payload: allKeys }));
-            
-            // Показываем уведомление
+async function sync() {
+    tg.HapticFeedback.impactOccurred('medium');
+    
+    try {
+        // Отправляем запрос прямо на сервер (порт 8080 мы указали в main.py)
+        const response = await fetch('http://146.103.118.40:8080/sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                admin_id: adminId,
+                payload: allKeys
+            })
+        });
+
+        if (response.ok) {
+            // Показываем уведомление, что всё сохранилось
             const t = document.getElementById('toast');
             t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 2000);
-            tg.HapticFeedback.notificationOccurred('success');
+        } else {
+            alert('Ошибка сохранения на сервере');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Не удалось связаться с сервером. Проверь, запущен ли бот и открыт ли порт 8080.');
+    }
+}
         }
 
         render();
