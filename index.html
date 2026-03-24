@@ -34,20 +34,38 @@
         .content-section { display: none; width: 100%; flex-direction: column; align-items: center; }
         .content-section.active { display: flex; }
 
-        .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); justify-content: center; gap: 20px; width: 100%; max-width: 1100px; padding: 10px 0; }
+        /* ИЗМЕНЕНО: minmax(260px, 1fr) заменен на 260px + добавлено margin: 0 auto для строгой центровки */
+        .cards-container { display: grid; grid-template-columns: repeat(auto-fit, 260px); justify-content: center; gap: 20px; width: 100%; max-width: 1100px; padding: 10px 0; margin: 0 auto; }
         #skeleton-screen { display: grid; width: 100%; }
         .skeleton-card { background: var(--skeleton-base); border-radius: 28px; height: 350px; position: relative; overflow: hidden; }
         .skeleton-card::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent); animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
         
-        .tariff-card { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 28px; padding: 35px 20px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease; position: relative; }
+        /* ИЗМЕНЕНО: Добавлены стили для плавных анимаций и тени */
+        .tariff-card { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 28px; padding: 35px 20px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease; position: relative; }
+        .tariff-card:hover { transform: translateY(-10px) scale(1.03); z-index: 10; box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-color: rgba(255, 255, 255, 0.2); }
+        
         .js-reveal { opacity: 0; transform: translateY(20px); transition: 0.5s ease-out, transform 0.5s ease-out; }
         .js-reveal.active { opacity: 1; transform: translateY(0); }
         .featured { border: 2px solid var(--accent-color); }
         .badge { position: absolute; top: -10px; background: var(--accent-color); color: white; font-size: 10px; font-weight: 900; padding: 5px 12px; border-radius: 20px; text-transform: uppercase; }
         .price { font-size: 30px; font-weight: 900; margin: 15px 0; color: #fff; }
-        .btn-select { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 18px; width: 100%; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform 0.2s; }
+        .btn-select { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 18px; width: 100%; font-weight: 800; font-size: 16px; cursor: pointer; transition: transform 0.2s, background 0.3s; }
         .btn-select:active { transform: scale(0.96); }
+
+        /* ИЗМЕНЕНО: Новые классы для разнообразного выделения тарифов */
+        .card-3m { border: 2px solid var(--accent-color); box-shadow: 0 0 15px rgba(214, 90, 45, 0.15); }
+        .card-3m:hover { box-shadow: 0 15px 30px rgba(214, 90, 45, 0.4), 0 0 20px rgba(214, 90, 45, 0.5); border-color: #ff784e; }
+
+        .card-6m { border: 2px solid var(--accent-gold); box-shadow: 0 0 15px rgba(255, 207, 75, 0.15); }
+        .card-6m .badge { background: var(--accent-gold); color: #13100d; }
+        .card-6m:hover { box-shadow: 0 15px 30px rgba(255, 207, 75, 0.4), 0 0 20px rgba(255, 207, 75, 0.5); border-color: #ffdf70; }
+
+        .card-1y { border: 2px solid #b339f4; box-shadow: 0 0 15px rgba(179, 57, 244, 0.15); background: linear-gradient(180deg, var(--card-bg) 0%, rgba(179, 57, 244, 0.05) 100%); }
+        .card-1y:hover { box-shadow: 0 15px 30px rgba(179, 57, 244, 0.4), 0 0 20px rgba(179, 57, 244, 0.5); border-color: #d178ff; }
+        .card-1y h3 { background: linear-gradient(90deg, #d178ff, #b339f4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-1y .btn-select { background: #b339f4; }
+        .card-1y .btn-select:hover { background: #c653ff; }
 
         .profile-card { background: var(--card-bg); border-radius: 32px; padding: 30px; width: 100%; max-width: 500px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; }
         .user-info-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
@@ -96,21 +114,21 @@
                     <div class="price">150₽</div>
                     <button class="btn-select" onclick="buy(150, '1 месяц')">Купить</button>
                 </div>
-                <div class="tariff-card featured js-reveal">
+                <div class="tariff-card featured card-3m js-reveal">
                     <div class="badge">Популярно</div>
                     <h3>💎 3 Месяца</h3>
                     <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Баланс комфорта</div>
                     <div class="price">350₽</div>
                     <button class="btn-select" onclick="buy(350, '3 месяца')">Купить</button>
                 </div>
-                <div class="tariff-card featured js-reveal">
+                <div class="tariff-card featured card-6m js-reveal">
                     <div class="badge">Лучшая цена</div>
                     <h3>⚡️ 6 Месяцев</h3>
                     <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Максимальный профит</div>
                     <div class="price">600₽</div>
                     <button class="btn-select" onclick="buy(600, '6 месяцев')">Купить</button>
                 </div>
-                <div class="tariff-card js-reveal">
+                <div class="tariff-card card-1y js-reveal">
                     <h3>👑 1 Год</h3>
                     <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">Беззаботный доступ</div>
                     <div class="price">1000₽</div>
