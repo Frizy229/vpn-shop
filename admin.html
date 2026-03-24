@@ -2,262 +2,381 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZAVARKA VPN Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAVARKA VPN | CRM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: #121212; 
-            color: white; 
-            padding: 15px; 
-            margin: 0; 
-            overflow-x: hidden;
+        /* Осенняя палитра и переменные */
+        :root {
+            --bg-dark: #120a08;
+            --card-bg: #1c110f;
+            --accent-orange: #d46a2a;
+            --accent-gold: #e3a054;
+            --text-main: #f5ece9;
+            --text-muted: #a38c85;
+            --danger: #cf3f3f;
+            --success: #52a852;
+            --glass: rgba(28, 17, 15, 0.85);
         }
 
-        /* Контейнер для вкладок */
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 800px; 
+        }
+
+        /* Навигация (Табы) */
         .tabs { 
             display: flex; 
             gap: 10px; 
             margin-bottom: 20px; 
-            position: relative; 
-            z-index: 100;
         }
         
-        .tab-btn { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 10px; 
-            border: none; 
-            background: #252525; 
-            color: #777; 
-            font-weight: bold; 
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid #36221c;
+            border-radius: 12px;
             cursor: pointer;
-            pointer-events: auto; /* Явно разрешаем клики */
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
-        .tab-btn.active.trial { background: #27ae60 !important; color: white !important; }
-        .tab-btn.active.pay { background: #2980b9 !important; color: white !important; }
+        .tab-btn.active {
+            background: var(--accent-orange);
+            color: #fff;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 15px rgba(212, 106, 42, 0.4);
+        }
 
-        /* Списки ключей */
-        .key-list { display: none; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .key-list.active { display: flex; }
+        .tab-content { 
+            display: none; 
+            animation: fadeIn 0.4s ease-in-out; 
+        }
+        
+        .tab-content.active { 
+            display: block; 
+        }
 
-        .key-item { 
-            background: #1e1e1e; 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Карточки и формы */
+        .card { 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 15px; 
+            border: 1px solid #36221c; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--accent-gold); font-size: 14px; }
+        
+        input, select, textarea { 
+            width: 100%; 
             padding: 12px; 
+            background: #0d0706; 
+            border: 1px solid #36221c; 
+            color: var(--text-main); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-family: inherit; 
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-orange);
+            outline: none;
+        }
+        
+        textarea { height: 150px; resize: vertical; font-family: monospace; font-size: 13px; }
+
+        button.primary { 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(135deg, var(--accent-orange), #b5541e); 
+            color: white; 
+            border: none; 
             border-radius: 10px; 
-            border: 1px solid #333;
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 15px rgba(212, 106, 42, 0.3);
+        }
+        
+        button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 106, 42, 0.5); }
+
+        /* Таблица истории */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .toolbar input { flex: 2; }
+        .toolbar select { flex: 1; }
+
+        .key-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .key-list::-webkit-scrollbar { width: 6px; }
+        .key-list::-webkit-scrollbar-thumb { background: var(--accent-orange); border-radius: 3px; }
+
+        .key-item {
+            background: #140b09;
+            border: 1px solid #36221c;
+            padding: 15px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: 0.2s;
         }
+        .key-item:hover { border-color: var(--accent-gold); }
+        .key-item.expiring { border-left: 4px solid var(--danger); background: rgba(207, 63, 63, 0.05); }
 
-        /* Форма добавления */
-        .add-box { 
-            background: #1a1a1a; 
-            padding: 20px; 
-            border-radius: 15px; 
-            border: 1px solid #333; 
-            margin-top: 10px;
-            position: relative;
-            z-index: 200; /* Самый высокий приоритет */
-            pointer-events: auto;
-        }
+        .key-info h4 { margin: 0 0 5px 0; color: var(--accent-gold); font-size: 15px; }
+        .key-info p { margin: 0; font-size: 12px; color: var(--text-muted); }
+        .key-info .owner { color: #8bb4e5; font-weight: bold; }
 
-        h3 { margin-top: 0; color: #fff; }
-
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 8px 0 15px; 
-            border-radius: 10px; 
-            border: 1px solid #333; 
-            background: #252525; 
-            color: white; 
-            box-sizing: border-box; 
-            font-size: 16px;
-            pointer-events: auto;
-        }
-
-        .btn-add { 
-            width: 100%; 
-            padding: 16px; 
-            border: none; 
-            border-radius: 12px; 
-            color: white; 
-            font-weight: bold; 
-            font-size: 16px;
+        .key-actions button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
             cursor: pointer;
-            pointer-events: auto;
-            -webkit-appearance: none; /* Фикс для iOS */
+            font-size: 18px;
+            transition: 0.2s;
+            padding: 5px;
         }
+        .key-actions button:hover { color: var(--accent-orange); transform: scale(1.1); }
+        .key-actions button.delete:hover { color: var(--danger); }
 
-        .btn-add.trial { background: #27ae60; }
-        .btn-add.pay { background: #2980b9; }
-
-        .btn-edit { background: #f39c12; color: white; border: none; padding: 6px 10px; border-radius: 6px; margin-right: 5px; }
-        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 6px; }
-
-        .toast { 
-            position: fixed; 
-            bottom: 20px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: #27ae60; 
-            padding: 10px 20px; 
-            border-radius: 20px; 
-            display: none; 
-            z-index: 1000;
+        /* Модальное окно (Glassmorphism) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 100;
+            opacity: 0; transition: opacity 0.3s ease;
         }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background: var(--glass); padding: 25px; border-radius: 15px; border: 1px solid var(--accent-gold); width: 90%; max-width: 400px; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <div class="tabs">
-        <button id="t-trial" class="tab-btn active trial" onclick="setTab('trial')">🕒 Триал</button>
-        <button id="t-pay" class="tab-btn pay" onclick="setTab('pay')">💎 Платные</button>
+        <button class="tab-btn active" onclick="switchTab('add')">➕ Синхронизация</button>
+        <button class="tab-btn" onclick="switchTab('history')">📜 Менеджер ключей</button>
     </div>
 
-    <div id="list-trial" class="key-list active"></div>
-    <div id="list-pay" class="key-list"></div>
-
-    <div class="add-box">
-        <h3 id="form-title">Добавить Ключ</h3>
-        <input type="text" id="inName" placeholder="Название">
-        <input type="text" id="inKey" placeholder="vless://...">
-        <button id="add-btn" class="btn-add trial" onclick="handleSave()">Сохранить в Триал</button>
+    <div id="add" class="tab-content active card">
+        <div class="form-group">
+            <label>Префикс названия ключа:</label>
+            <input type="text" id="keyPrefix" placeholder="Например: Zavarka_Premium_" value="Zavarka_Premium_">
+        </div>
+        <div class="form-group">
+            <label>Тип подписки (Тариф):</label>
+            <select id="keyType">
+                <option value="trial">Trial (24 часа)</option>
+                <option value="1_month">1 Месяц (30 дней)</option>
+                <option value="3_months">3 Месяца (90 дней)</option>
+                <option value="6_months">6 Месяцев (180 дней)</option>
+                <option value="1_year">1 Год (365 дней)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Список ключей (каждый с новой строки):</label>
+            <textarea id="keysInput" placeholder="vless://...&#10;ss://..."></textarea>
+        </div>
+        <button class="primary" onclick="syncKeys()">Отправить в базу</button>
     </div>
 
-    <div id="toast" class="toast">✅ Сохранено</div>
+    <div id="history" class="tab-content card">
+        <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="Поиск по @username или названию..." onkeyup="renderHistory()">
+            <select id="sortSelect" onchange="renderHistory()">
+                <option value="newest">Сначала новые</option>
+                <option value="expiring">Скоро истекают</option>
+            </select>
+        </div>
+        <div class="key-list" id="keyList">
+            <p style="text-align:center; color: var(--text-muted);">Загрузка базы...</p>
+        </div>
+    </div>
+</div>
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        let allKeys = []; // Основной массив данных
-        let currentTab = 'trial';
-        let editIndex = -1;
+<div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+        <h3 style="color: var(--accent-gold); margin-top:0;">Редактировать ключ</h3>
+        <input type="hidden" id="editKeyId">
+        <div class="form-group">
+            <label>Название ключа:</label>
+            <input type="text" id="editName">
+        </div>
+        <div class="form-group">
+            <label>Владелец (@username):</label>
+            <input type="text" id="editOwner" placeholder="Не выдан">
+        </div>
+        <div class="form-group" style="display: flex; gap:10px;">
+            <button class="primary" style="background: #444;" onclick="closeModal()">Отмена</button>
+            <button class="primary" onclick="saveEdit()">Сохранить</button>
+        </div>
+    </div>
+</div>
 
-        // 1. Парсим данные из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataStr = urlParams.get('data');
-        if (dataStr) {
-            try {
-                allKeys = JSON.parse(decodeURIComponent(dataStr));
-            } catch(e) { console.error("Ошибка парсинга:", e); }
-        }
-        const adminId = urlParams.get('admin_id');
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    const ADMIN_ID = tg.initDataUnsafe?.user?.id || 8702663232; // Резервный ID для ПК
+    const API_URL = 'https://zavarka.fun';
 
-        // 2. Отрисовка списка
-        function render() {
-            const tList = document.getElementById('list-trial');
-            const pList = document.getElementById('list-pay');
-            tList.innerHTML = ''; pList.innerHTML = '';
+    let keysDatabase = [];
 
-            allKeys.forEach((k, i) => {
-                const item = document.createElement('div');
-                item.className = 'key-item';
-                item.innerHTML = `
-                    <div style="flex:1; overflow:hidden;">
-                        <span style="color:#ffa06d; font-weight:bold; display:block;">${k.name}</span>
-                        <div style="font-size:12px; color:#aaa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${k.key}</div>
-                    </div>
-                    <div style="display:flex;">
-                        <button class="btn-edit" onclick="startEdit(${i})">✏️</button>
-                        <button class="btn-del" onclick="removeKey(${i})">🗑</button>
-                    </div>
-                `;
-                if (k.type === 'trial') tList.appendChild(item);
-                else pList.appendChild(item);
+    // Переключение вкладок
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        
+        if(tabId === 'history') loadHistory();
+    }
+
+    // Добавление ключей
+    async function syncKeys() {
+        const prefix = document.getElementById('keyPrefix').value.trim();
+        const type = document.getElementById('keyType').value;
+        const keysText = document.getElementById('keysInput').value;
+        const rawKeys = keysText.split('\n').filter(line => line.trim() !== "");
+
+        if (!rawKeys.length) return tg.showAlert("Список пуст!");
+
+        try {
+            const response = await fetch(`${API_URL}/admin/keys`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_id: ADMIN_ID, prefix, type, keys: rawKeys })
             });
-            tg.expand();
-        }
 
-        // 3. Переключение вкладок
-        function setTab(t) {
-            currentTab = t;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('t-' + t).classList.add('active');
-            
-            document.querySelectorAll('.key-list').forEach(l => l.classList.remove('active'));
-            document.getElementById('list-' + t).classList.add('active');
-            
-            const btn = document.getElementById('add-btn');
-            btn.className = 'btn-add ' + t;
-            btn.innerText = 'Сохранить в ' + (t === 'trial' ? 'Триал' : 'Платные');
-            cancelEdit();
-        }
-
-        function startEdit(i) {
-            editIndex = i;
-            const k = allKeys[i];
-            document.getElementById('inName').value = k.name;
-            document.getElementById('inKey').value = k.key;
-            document.getElementById('form-title').innerText = "📝 Редактировать";
-            document.getElementById('add-btn').innerText = "Обновить ключ";
-        }
-
-        function cancelEdit() {
-            editIndex = -1;
-            document.getElementById('inName').value = '';
-            document.getElementById('inKey').value = '';
-            document.getElementById('form-title').innerText = "Добавить Ключ";
-        }
-
-        async function handleSave() {
-            const n = document.getElementById('inName').value.trim();
-            const v = document.getElementById('inKey').value.trim();
-            if(!n || !v) return alert('Заполни поля!');
-
-            if(editIndex > -1) {
-                allKeys[editIndex].name = n;
-                allKeys[editIndex].key = v;
+            if (response.ok) {
+                tg.showAlert(`✅ Успешно добавлено ключей: ${rawKeys.length}`);
+                document.getElementById('keysInput').value = '';
             } else {
-                allKeys.push({ name: n, key: v, type: currentTab });
+                tg.showAlert("❌ Ошибка доступа.");
             }
+        } catch (e) {
+            tg.showAlert("❌ Ошибка сети.");
+        }
+    }
+
+    // Загрузка истории
+    async function loadHistory() {
+        try {
+            const response = await fetch(`${API_URL}/admin/keys?admin_id=${ADMIN_ID}`);
+            if (response.ok) {
+                keysDatabase = await response.json();
+                renderHistory();
+            }
+        } catch (e) {
+            document.getElementById('keyList').innerHTML = `<p style="color: var(--danger); text-align:center;">Ошибка загрузки</p>`;
+        }
+    }
+
+    // Отрисовка с фильтрами и сортировкой
+    function renderHistory() {
+        const list = document.getElementById('keyList');
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const sort = document.getElementById('sortSelect').value;
+
+        let filtered = keysDatabase.filter(k => 
+            (k.name && k.name.toLowerCase().includes(search)) || 
+            (k.owner && k.owner.toLowerCase().includes(search))
+        );
+
+        if (sort === 'newest') {
+            filtered.sort((a, b) => b.created_at - a.created_at);
+        } else if (sort === 'expiring') {
+            filtered.sort((a, b) => {
+                if (!a.expires_at) return 1;
+                if (!b.expires_at) return -1;
+                return a.expires_at - b.expires_at;
+            });
+        }
+
+        list.innerHTML = '';
+        if(filtered.length === 0) return list.innerHTML = `<p style="text-align:center; color: var(--text-muted);">Ничего не найдено</p>`;
+
+        const now = Date.now() / 1000;
+
+        filtered.forEach(k => {
+            const isIssued = k.owner !== null;
+            const expires = k.expires_at ? new Date(k.expires_at * 1000).toLocaleDateString('ru-RU') : 'Не активирован';
+            const timeLeft = k.expires_at ? (k.expires_at - now) : 999999;
+            const isExpiringSoon = isIssued && timeLeft > 0 && timeLeft < 86400; // Меньше 24 часов
             
-            await sync(); // Отправка на сервер
-            cancelEdit();
-            render();
-        }
+            const ownerText = isIssued ? `<span class="owner">${k.owner}</span>` : 'Свободен';
+            
+            list.innerHTML += `
+                <div class="key-item ${isExpiringSoon ? 'expiring' : ''}">
+                    <div class="key-info">
+                        <h4>${k.name}</h4>
+                        <p>Владелец: ${ownerText} | Тариф: ${k.type.replace('_', ' ')}</p>
+                        <p>Истекает: <span style="color: ${isExpiringSoon ? 'var(--danger)' : 'inherit'}">${expires}</span></p>
+                    </div>
+                    <div class="key-actions">
+                        <button onclick="openModal('${k.id}', '${k.name}', '${k.owner || ''}')">✏️</button>
+                        <button class="delete" onclick="deleteKey('${k.id}')">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
 
-        async function removeKey(i) {
-            if(confirm('Удалить этот ключ?')) {
-                allKeys.splice(i, 1);
-                await sync();
-                render();
-            }
-        }
+    // Модальное окно
+    function openModal(id, name, owner) {
+        document.getElementById('editKeyId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editOwner').value = owner;
+        document.getElementById('editModal').classList.add('show');
+    }
+    function closeModal() { document.getElementById('editModal').classList.remove('show'); }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ СИНХРОНИЗАЦИИ
-        async function sync() {
-            try {
-                // Пытаемся отправить запрос
-                const response = await fetch('https://zavarka.fun/sync', {
-                    method: 'POST',
-                    mode: 'cors', 
-                    headers: {
-                        'Content-Type': 'application/json' // Вернул json, так как в боте мы ждем json
-                    },
-                    body: JSON.stringify({
-                        admin_id: adminId,
-                        payload: allKeys // Исправлено: было keys, стало allKeys
-                    })
-                });
-                
-                if (response.ok) {
-                    const toast = document.getElementById('toast');
-                    toast.style.display = 'block';
-                    setTimeout(() => { toast.style.display = 'none'; }, 2000);
-                } else {
-                    alert("Ошибка сервера: " + response.status);
-                }
-            } catch (error) {
-                console.error("Ошибка запроса:", error);
-                alert("Ошибка сети. Попробуй открыть админку через 'Три точки -> Открыть в браузере'");
-            }
-        }
+    // Редактирование ключа
+    async function saveEdit() {
+        const id = document.getElementById('editKeyId').value;
+        const name = document.getElementById('editName').value;
+        let owner = document.getElementById('editOwner').value.trim();
+        if (owner === "") owner = null;
 
-        render();
-    </script>
+        try {
+            await fetch(`${API_URL}/admin/keys/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_id: ADMIN_ID, name: name, owner: owner })
+            });
+            closeModal();
+            loadHistory();
+        } catch (e) { tg.showAlert("Ошибка сохранения"); }
+    }
+
+    // Удаление ключа
+    async function deleteKey(id) {
+        if (!confirm("Удалить этот ключ навсегда?")) return;
+        try {
+            await fetch(`${API_URL}/admin/keys/${id}?admin_id=${ADMIN_ID}`, { method: 'DELETE' });
+            loadHistory();
+        } catch (e) { tg.showAlert("Ошибка удаления"); }
+    }
+</script>
 </body>
 </html>
