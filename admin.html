@@ -252,32 +252,40 @@
         if(tabId === 'history') loadHistory();
     }
 
-    // Добавление ключей
-    async function syncKeys() {
-        const prefix = document.getElementById('keyPrefix').value.trim();
-        const type = document.getElementById('keyType').value;
-        const keysText = document.getElementById('keysInput').value;
-        const rawKeys = keysText.split('\n').filter(line => line.trim() !== "");
+   // Добавление ключей
+async function syncKeys() {
+    const prefix = document.getElementById('keyPrefix').value.trim();
+    // ИСПРАВЛЕНО: берем значение из subscriptionType, а не keyType
+    const type = document.getElementById('subscriptionType').value; 
+    const keysText = document.getElementById('keysInput').value;
+    const rawKeys = keysText.split('\n').filter(line => line.trim() !== "");
 
-        if (!rawKeys.length) return tg.showAlert("Список пуст!");
+    if (rawKeys.length === 0) return tg.showAlert("Список пуст!");
 
-        try {
-            const response = await fetch(`${API_URL}/admin/keys`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ admin_id: ADMIN_ID, prefix, type, keys: rawKeys })
-            });
+    try {
+        const response = await fetch(`${API_URL}/admin/keys`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                admin_id: ADMIN_ID, 
+                prefix: prefix, 
+                type: type, 
+                keys: rawKeys 
+            })
+        });
 
-            if (response.ok) {
-                tg.showAlert(`✅ Успешно добавлено ключей: ${rawKeys.length}`);
-                document.getElementById('keysInput').value = '';
-            } else {
-                tg.showAlert("❌ Ошибка доступа.");
-            }
-        } catch (e) {
-            tg.showAlert("❌ Ошибка сети.");
+        if (response.ok) {
+            const result = await response.json();
+            tg.showScanQrPopup; // Можно убрать, если не нужно
+            tg.showAlert(`✅ Успешно добавлено ключей: ${rawKeys.length}`);
+            document.getElementById('keysInput').value = '';
+        } else {
+            tg.showAlert("❌ Ошибка доступа.");
         }
+    } catch (e) {
+        tg.showAlert("❌ Ошибка сети.");
     }
+}
 
     // Загрузка истории
     async function loadHistory() {
