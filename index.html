@@ -140,11 +140,12 @@
         <div id="profile" class="content-section">
             <div class="profile-card">
                 <div class="user-info-header">
-                    <div class="user-avatar" id="user-initials">U</div>
-                    <div>
-                        <div id="user-name" style="font-weight: bold; font-size: 18px;">Загрузка...</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="user-id">000000</span></div>
-                    </div>
+                    <div class="user-avatar" id="user-initials" style="overflow: hidden;">U</div>
+                        <div style="display: flex; flex-direction: column; justify-content: center;">
+                            <div id="user-name" style="font-weight: bold; font-size: 18px; margin-bottom: 2px;">Загрузка...</div>
+                            <div id="user-username" style="font-size: 13px; color: var(--accent-gold); margin-bottom: 2px;"></div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="user-id">000000</span></div>
+                        </div>
                 </div>
                 <div class="status-block">
                     <div class="info-row"><span class="info-label">Статус:</span><span class="info-value" id="sub-status" style="color: #ff4757;">Неактивна</span></div>
@@ -257,38 +258,53 @@
             if (event) event.currentTarget.classList.add('active');
         }
 
-        // --- НОВАЯ ФУНКЦИЯ: ЗАГРУЗКА ДАННЫХ С СЕРВЕРА ---
-        async function loadServerData() {
-            const initData = tg.initData; // Зашифрованные данные для проверки сервером
-            
+        // --- ЗАГРУЗКА ДАННЫХ О КЛЮЧЕ С СЕРВЕРА ---
+        async function loadServerData(username, userId) {
             try {
-                // ЗАМЕНИТЕ ЭТОТ URL на адрес вашего бэкенда (API)
-                const response = await fetch('https://zavarka.fun/get_user_info', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ _auth: initData })
-                });
-
-                if (!response.ok) throw new Error('Ошибка сети');
+                // Запрос к API из main.py
+                const response = await fetch(`/api/user/status?username=${username}&user_id=${userId}`);
                 const data = await response.json();
-
-                // Автоматическая подстановка данных из базы бота
-                document.getElementById('days-left').innerText = (data.days_left || 0) + ' дней';
-                document.getElementById('expire-date').innerText = data.expire_date || '--.--.----';
-                document.getElementById('vpn-key').innerText = data.key || 'Ключ не найден';
-                
+        
                 const statusEl = document.getElementById('sub-status');
-                if (data.active) {
+                const expireDateEl = document.getElementById('expire-date');
+                const daysLeftEl = document.getElementById('days-left');
+                const vpnKeyEl = document.getElementById('vpn-key');
+        
+                if (data.status === 'active') {
                     statusEl.innerText = 'Активна';
-                    statusEl.style.color = '#2ed573';
+                    statusEl.style.color = '#42ed57'; // Зеленый цвет из твоего старого кода
+                    vpnKeyEl.innerText = data.key_value;
+        
+                    const now = Math.floor(Date.now() / 1000);
+                    const timeLeft = data.expires_at - now;
+        
+                    if (timeLeft > 0) {
+                        // Форматируем дату Истекает: ДД.ММ.ГГГГ ЧЧ:ММ
+                        const expDate = new Date(data.expires_at * 1000);
+                        expireDateEl.innerText = expDate.toLocaleDateString('ru-RU') + " " + expDate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+        
+                        // Считаем Осталось: дни и часы
+                        const days = Math.floor(timeLeft / 86400);
+                        const hours = Math.floor((timeLeft % 86400) / 3600);
+                        daysLeftEl.innerText = days > 0 ? `${days} дней ${hours} ч.` : `${hours} часов`;
+                    } else {
+                        setKeyInactive(statusEl, expireDateEl, daysLeftEl, vpnKeyEl);
+                    }
                 } else {
-                    statusEl.innerText = 'Неактивна';
-                    statusEl.style.color = '#ff4757';
+                    setKeyInactive(statusEl, expireDateEl, daysLeftEl, vpnKeyEl);
                 }
             } catch (e) {
-                console.error("Ошибка при получении данных с сервера:", e);
-                // Если сервер недоступен, можно оставить значения по умолчанию или из URL
+                console.error("Ошибка загрузки данных ключа:", e);
+                document.getElementById('vpn-key').innerText = "Ошибка загрузки";
             }
+        }
+        
+        function setKeyInactive(statusEl, expireDateEl, daysLeftEl, vpnKeyEl) {
+            statusEl.innerText = 'Неактивна';
+            statusEl.style.color = '#ff4757'; // Красный цвет из твоего старого кода
+            expireDateEl.innerText = '--.--.----';
+            daysLeftEl.innerText = '0 дней';
+            vpnKeyEl.innerText = 'Ключ не найден';
         }
 
         window.addEventListener('load', () => {
@@ -304,23 +320,34 @@
                 });
             }, 600);
 
-            // 2. Получение данных профиля напрямую из Telegram (Имя, ID, Аватар)
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const user = tg.initDataUnsafe.user;
-                document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-                document.getElementById('user-id').innerText = user.id;
-                
-                // АВАТАРКА: подставляем фото из Telegram
-                if (user.photo_url) {
-                    const avatarContainer = document.getElementById('user-initials');
-                    avatarContainer.innerHTML = `<img src="${user.photo_url}" style="width:100%; height:100%; border-radius:15px; object-fit:cover;">`;
-                } else {
-                    document.getElementById('user-initials').innerText = user.first_name.charAt(0).toUpperCase();
-                }
+// 2. Получение данных профиля напрямую из Telegram
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            
+            // Имя и ID
+            document.getElementById('user-name').innerText = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            document.getElementById('user-id').innerText = user.id;
+
+            // Добавляем юзернейм (@name)
+            if (user.username) {
+                document.getElementById('user-username').innerText = `@${user.username}`;
             }
 
-            // 3. Запуск автоматического обновления данных из базы (сервера)
-            loadServerData();
+            // АВАТАРКА: подставляем фото из Telegram
+            const avatarContainer = document.getElementById('user-initials');
+            if (user.photo_url) {
+                avatarContainer.innerHTML = `<img src="${user.photo_url}" style="width:100%; height:100%; border-radius:15px; object-fit:cover;">`;
+                avatarContainer.style.background = 'transparent'; // Убираем фон, если есть фото
+            } else {
+                avatarContainer.innerText = (user.first_name || "U").charAt(0).toUpperCase();
+            }
+
+                // 3. Запуск обновления данных ключа с передачей username и id
+                loadServerData(user.username, user.id);
+            } else {
+                // Если открыто в браузере (не в ТГ)
+                loadServerData('undefined', 'undefined');
+            }
         });
 
         function copyKey() {
