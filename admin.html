@@ -425,14 +425,34 @@ async function syncKeys() {
         } catch (e) { tg.showAlert("Ошибка сохранения"); }
     }
 
-    // Удаление ключа
-    async function deleteKey(id) {
-        if (!confirm("Удалить этот ключ навсегда?")) return;
-        try {
-            await fetch(`${API_URL}/admin/keys/${id}?admin_id=${ADMIN_ID}`, { method: 'DELETE' });
-            loadHistory();
-        } catch (e) { tg.showAlert("Ошибка удаления"); }
+async function deleteKey(id) {
+    // Окно подтверждения
+    if (!confirm('Удалить этот ключ навсегда?')) return;
+
+    try {
+        const response = await fetch(`${API_URL}/admin/keys/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                admin_id: Number(ADMIN_ID) // Передаем ID как число для валидации
+            })
+        });
+
+        if (response.ok) {
+            // Если сервер удалил успешно, обновляем список в интерфейсе
+            renderHistory(); 
+            tg.showAlert("✅ Ключ полностью удален из базы и файлов.");
+        } else {
+            const err = await response.json();
+            tg.showAlert("❌ Ошибка: " + (err.detail || "Доступ запрещен"));
+        }
+    } catch (e) {
+        console.error(e);
+        tg.showAlert("❌ Ошибка сети при удалении");
     }
+}
 </script>
 </body>
 </html>
