@@ -303,25 +303,28 @@
     }
 
     // Инициализация данных Телеграм
-    window.onload = function() {
+        window.onload = function() {
+        console.log("WebApp инициализирован"); // Увидим в консоли, если есть доступ
+        
+        // Проверяем, есть ли данные от Телеграм
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const u = tg.initDataUnsafe.user;
             
-            // Заполняем текст
-            document.getElementById('cab-user-name').innerText = `${u.first_name || ''} ${u.last_name || ''}`.trim();
-            document.getElementById('cab-user-id').innerText = u.id;
-            if (u.username) document.getElementById('cab-user-username').innerText = `@${u.username}`;
-
-            // Аватарка
-            const avatar = document.getElementById('cab-user-avatar');
-            if (u.photo_url) {
-                avatar.innerHTML = `<img src="${u.photo_url}" style="width:100%; height:100%; border-radius:15px; object-fit:cover;">`;
-            } else {
-                avatar.innerText = (u.first_name || "U")[0].toUpperCase();
-            }
-
-            // Загружаем инфо о ключе
+            // Заполняем данные пользователя
+            const nameEl = document.getElementById('cab-user-name');
+            if (nameEl) nameEl.innerText = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+            
+            const idEl = document.getElementById('cab-user-id');
+            if (idEl) idEl.innerText = u.id;
+    
+            // Загружаем данные с сервера
             fetchCabinetData(u.username, u.id);
+        } else {
+            // Если зашли через браузер — ставим тестовые данные, чтобы не висела загрузка
+            console.warn("Данные Telegram не найдены. Использую тестовый режим.");
+            document.getElementById('cab-user-name').innerText = "Тестовый Пользователь";
+            document.getElementById('cab-user-id').innerText = "12345678";
+            setCabinetInactive(); // Показывает "Ключ не найден" вместо бесконечной загрузки
         }
     };
 
