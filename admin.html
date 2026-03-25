@@ -170,21 +170,44 @@
             align-items: center;
             transition: 0.2s;
         }
-        .key-item:hover { border-color: var(--accent-gold); }
+       .key-item {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 15px !important;
+        gap: 15px !important; /* Отступ между текстом и кнопками */
+        }
+        
         .key-item.expiring { border-left: 4px solid var(--danger); background: rgba(207, 63, 63, 0.05); }
 
-        .key-info h4 { margin: 0 0 5px 0; color: var(--accent-gold); font-size: 15px; }
+        .key-info {
+        flex: 1 !important;
+        min-width: 0 !important; /* Критично для работы переноса текста */
+        }
+        .key-info h4 {
+        margin: 0 0 5px 0 !important;
+        word-break: break-all !important; /* Разбивает очень длинные ID/названия */
+        white-space: normal !important;   /* Разрешает перенос на новую строку */
+        line-height: 1.2 !important;
+        color: var(--accent-gold) !important;
+        }
         .key-info p { margin: 0; font-size: 12px; color: var(--text-muted); }
         .key-info .owner { color: #8bb4e5; font-weight: bold; }
 
+        .key-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        flex-shrink: 0 !important; /* Запрещает кнопкам сжиматься */
+        align-items: center !important;
+        }
+        
         .key-actions button {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.2s;
-            padding: 5px;
+        background: none !important;
+        border: none !important;
+        padding: 5px !important;
+        cursor: pointer !important;
+        width: 30px !important;
         }
         .key-actions button:hover { color: var(--accent-orange); transform: scale(1.1); }
         .key-actions button.delete:hover { color: var(--danger); }
