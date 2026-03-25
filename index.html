@@ -137,28 +137,25 @@
             </div>
         </div>
 
-        <div id="cabinet-page" class="page">
-                <h1 style="color: var(--accent)">Кабинет</h1>
-                <div class="card">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div id="user-avatar" style="width: 50px; height: 50px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">👤</div>
-                        <div>
-                            <div id="user-name" style="font-weight: bold; font-size: 18px;">Загрузка...</div>
-                            <div id="user-id" style="color: var(--text-dim); font-size: 13px;">ID: 0000000</div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 25px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                            <span style="color: var(--text-dim)">Статус подписки:</span>
-                            <span id="sub-status" style="font-weight: bold;">Проверка...</span>
-                        </div>
-                        <div id="key-container" style="display: none;">
-                            <div class="key-box" id="vpn-key">загрузка ключа...</div>
-                            <button class="btn-gold" style="background: #333; color: #fff;" onclick="copyKey()">Копировать ключ</button>
-                        </div>
-                    </div>
+            <div id="cabinet" class="page active">
+            <div class="cabinet-header">
+                <div class="avatar" id="user-avatar">?</div>
+                <div class="user-info">
+                    <h2 id="user-name">Загрузка...</h2>
+                    <p id="user-username">@username</p>
                 </div>
+            </div>
+    
+            <div class="card">
+                <div id="sub-status-badge" class="status-badge status-inactive">ПРОВЕРКА...</div>
+                <div style="color: var(--text-gray); font-size: 13px;">Осталось времени:</div>
+                <div id="time-left" class="time-left">00 дн. 00:00:00</div>
+            </div>
+    
+            <div class="card" id="key-card" style="display: none;">
+                <div style="color: var(--text-gray); font-size: 13px;">Твой ключ:</div>
+                <div class="key-box" id="vpn-key">загрузка...</div>
+                <button class="btn-action" onclick="copyKey()" style="background: #222; color: #fff;">Копировать ключ</button>
             </div>
         </div>
     </div>
@@ -242,69 +239,78 @@
     </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    const API_BASE = "https://zavarka.fun"; // Твой домен
+        const tg = window.Telegram.WebApp;
+        const API_BASE = "https://zavarka.fun"; // ТВОЙ ДОМЕН
 
-    tg.expand();
+        tg.expand();
 
-    // Функция переключения страниц (твои ID должны совпадать)
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        // Находим кнопку, которая вызвала функцию
-        if (event) event.currentTarget.classList.add('active');
-
-        if(pageId === 'cabinet-page') {
-            loadCabinet();
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         }
-    }
 
-    async function loadCabinet() {
-        const user = tg.initDataUnsafe?.user;
-        if(!user) return;
+        function formatTime(seconds) {
+            const d = Math.floor(seconds / (3600*24));
+            const h = Math.floor(seconds % (3600*24) / 3600);
+            const m = Math.floor(seconds % 3600 / 60);
+            const s = Math.floor(seconds % 60);
+            return `${d} дн. ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
 
-        // Заполняем профиль
-        if(document.getElementById('cab-name')) document.getElementById('cab-name').innerText = user.first_name;
-        if(document.getElementById('cab-id')) document.getElementById('cab-id').innerText = 'ID: ' + user.id;
+        async function init() {
+            const user = tg.initDataUnsafe?.user;
+            if(!user) return;
 
-        try {
-            // Запрос к серверу
-            const response = await fetch(`${API_BASE}/api/user/status?user_id=${user.id}&username=${user.username || ''}`);
-            const data = await response.json();
+            // Ставим имя и аватарку-заглушку
+            document.getElementById('user-name').innerText = user.first_name;
+            document.getElementById('user-username').innerText = user.username ? '@' + user.username : 'ID: ' + user.id;
+            document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
 
-            const statusEl = document.getElementById('cab-status');
-            const keyEl = document.getElementById('cab-key');
+            try {
+                const res = await fetch(`${API_BASE}/api/user/status?user_id=${user.id}&username=${user.username || ''}`);
+                const data = await res.json();
 
-            if(data.status === 'active') {
-                if(statusEl) {
-                    statusEl.innerText = 'Активна';
-                    statusEl.style.color = '#42ed57';
+                const badge = document.getElementById('sub-status-badge');
+                const keyCard = document.getElementById('key-card');
+                const timeEl = document.getElementById('time-left');
+
+                if(data.status !== 'inactive') {
+                    badge.innerText = data.status === 'active' ? 'ПОДПИСКА АКТИВНА' : 'СКОРО ИСТЕКАЕТ';
+                    badge.className = `status-badge status-${data.status}`;
+                    
+                    document.getElementById('vpn-key').innerText = data.key_value;
+                    keyCard.style.display = 'block';
+
+                    // Запуск таймера
+                    let timeLeft = data.time_left_sec;
+                    setInterval(() => {
+                        if(timeLeft > 0) {
+                            timeEl.innerText = formatTime(timeLeft);
+                            timeLeft--;
+                        } else {
+                            location.reload();
+                        }
+                    }, 1000);
+                } else {
+                    badge.innerText = 'ПОДПИСКА НЕАКТИВНА';
+                    badge.className = 'status-badge status-inactive';
+                    timeEl.innerText = '00 дн. 00:00:00';
                 }
-                if(keyEl) keyEl.innerText = data.key_value;
-            } else {
-                if(statusEl) {
-                    statusEl.innerText = 'Неактивна';
-                    statusEl.style.color = '#ff4757';
-                }
-                if(keyEl) keyEl.innerText = 'Ключ не найден';
+            } catch(e) {
+                console.error(e);
             }
-        } catch(e) {
-            console.error("Ошибка загрузки:", e);
         }
-    }
 
-    function copyKey() {
-        const key = document.getElementById('cab-key').innerText;
-        if(key && key !== 'Ключ не найден') {
+        function copyKey() {
+            const key = document.getElementById('vpn-key').innerText;
             navigator.clipboard.writeText(key);
-            tg.showAlert("Ключ скопирован!");
+            tg.showConfirm("Ключ скопирован!");
         }
-    }
 
-    // Инициализация при входе
-    loadCabinet();
-</script>
+        init();
+    </script>
 </body>
 </html>
