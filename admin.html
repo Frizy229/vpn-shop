@@ -170,12 +170,16 @@
             align-items: center;
             transition: 0.2s;
         }
-       .key-item {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 15px !important;
-        gap: 15px !important; /* Отступ между текстом и кнопками */
+        .key-item {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 15px !important;
+            gap: 15px !important;
+            background: var(--card-bg);
+            border: 1px solid #36221c;
+            border-radius: 12px;
+            margin-bottom: 10px;
         }
         
         .key-item.expiring { border-left: 4px solid var(--danger); background: rgba(207, 63, 63, 0.05); }
@@ -209,7 +213,7 @@
         cursor: pointer !important;
         width: 30px !important;
         }
-        .key-actions button:hover { color: var(--accent-orange); transform: scale(1.1); }
+        .key-actions button:hover { color: var(--accent-orange); transform: scale(1.2); }
         .key-actions button.delete:hover { color: var(--danger); }
 
         /* Модальное окно (Glassmorphism) */
@@ -447,32 +451,43 @@ async function syncKeys() {
         } catch (e) { tg.showAlert("Ошибка сохранения"); }
     }
 
-async function deleteKey(id) {
-    // Окно подтверждения
-    if (!confirm('Удалить этот ключ навсегда?')) return;
+async function deleteKey(keyId) {
+    if (!confirm("Удалить этот ключ навсегда?")) return;
 
     try {
-        const response = await fetch(`${API_URL}/admin/keys/${id}`, {
+        const response = await fetch(`${API_URL}/admin/keys/${keyId}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                admin_id: Number(ADMIN_ID) // Передаем ID как число для валидации
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_id: ADMIN_ID }) // Передаем ID в body
         });
 
         if (response.ok) {
-            // Если сервер удалил успешно, обновляем список в интерфейсе
-            renderHistory(); 
-            tg.showAlert("✅ Ключ полностью удален из базы и файлов.");
+            tg.showAlert("✅ Ключ удален");
+            renderHistory(); // Обновляем список
         } else {
-            const err = await response.json();
-            tg.showAlert("❌ Ошибка: " + (err.detail || "Доступ запрещен"));
+            tg.showAlert("❌ Ошибка доступа (403)");
         }
     } catch (e) {
-        console.error(e);
         tg.showAlert("❌ Ошибка сети при удалении");
+    }
+}
+
+    // 2. ФУНКЦИЯ СИНХРОНИЗАЦИИ (Очистка фантомных ключей)
+async function performSync() {
+    try {
+        const response = await fetch(`${API_URL}/admin/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_id: ADMIN_ID })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            tg.showAlert(`✅ Синхронизация окончена! Удалено лишних: ${result.removed}`);
+            renderHistory();
+        }
+    } catch (e) {
+        tg.showAlert("❌ Ошибка синхронизации");
     }
 }
 </script>
