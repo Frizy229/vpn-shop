@@ -137,26 +137,39 @@
             </div>
         </div>
 
-        <div id="profile" class="content-section">
-            <div class="profile-card">
-                <div class="user-info-header">
-                    <div class="user-avatar" id="user-initials" style="overflow: hidden;">U</div>
-                        <div style="display: flex; flex-direction: column; justify-content: center;">
-                            <div id="user-name" style="font-weight: bold; font-size: 18px; margin-bottom: 2px;">Загрузка...</div>
-                            <div id="user-username" style="font-size: 13px; color: var(--accent-gold); margin-bottom: 2px;"></div>
-                            <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="user-id">000000</span></div>
-                        </div>
+            <div class="user-info">
+                <div class="user-avatar" id="user-initials">U</div>
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <div id="user-name" style="font-weight: bold; font-size: 18px; color: white;">Загрузка...</div>
+                    <div id="user-username" style="font-size: 13px; color: var(--accent-gold); margin-bottom: 2px;"></div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="user-id">000000</span></div>
                 </div>
-                <div class="status-block">
-                    <div class="info-row"><span class="info-label">Статус:</span><span class="info-value" id="sub-status" style="color: #ff4757;">Неактивна</span></div>
-                    <div class="info-row"><span class="info-label">Истекает:</span><span class="info-value" id="expire-date">--.--.----</span></div>
-                    <div class="info-row"><span class="info-label">Осталось:</span><span class="info-value" id="days-left">0 дней</span></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Статус подписки</div>
+                    <div class="stat-value" id="sub-status" style="color: var(--text-secondary);">Загрузка...</div>
                 </div>
-                <div style="margin-bottom: 10px; font-size: 13px; font-weight: bold; padding-left: 5px;">ВАШ КЛЮЧ ДОСТУПА:</div>
-                <div class="key-box">
-                    <div class="key-text" id="vpn-key">vless://key_not_found...</div>
-                    <button class="copy-btn" onclick="copyKey()">Копировать</button>
+                <div class="stat-card">
+                    <div class="stat-label">Истекает</div>
+                    <div class="stat-value" id="expire-date">--.--.----</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-label">Осталось времени</div>
+                    <div class="stat-value" id="days-left">0 дней</div>
+                </div>
+            </div>
+            
+            <div class="key-section">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                    Ваш ключ доступа:
+                </div>
+                <div class="key-container">
+                    <div class="key-display" id="vpn-key">Загрузка...</div>
+                    <button class="copy-button" onclick="copyKey()">Копировать</button>
+                </div>
+            </div>
                 <p style="font-size: 11px; color: var(--text-secondary); margin-top: 15px; text-align: center;">Ключ подходит для AmneziaVPN, V2Ray и других клиентов.</p>
             </div>
         </div>
