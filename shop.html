@@ -100,7 +100,6 @@
         <h2>ZAVARKA VPN</h2>
         <div class="tabs-nav">
             <button class="tab-btn active" onclick="switchTab('shop')">🛒 Магазин</button>
-            <button class="tab-btn" onclick="switchTab('profile')">👤 Кабинет</button>
         </div>
 
         <div id="shop" class="content-section active">
@@ -136,42 +135,6 @@
                 </div>
             </div>
         </div>
-
-            <div id="cabinet-page" class="page active">
-        <div class="profile-card">
-            <div class="user-info">
-                <div class="user-avatar" id="cab-initials">U</div>
-                <div style="display: flex; flex-direction: column; justify-content: center;">
-                    <div id="cab-name" style="font-weight: bold; font-size: 18px; color: white;">Загрузка...</div>
-                    <div id="cab-username" style="font-size: 13px; color: var(--accent-gold); margin-bottom: 2px;"></div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="cab-id">000000</span></div>
-                </div>
-            </div>
-    
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Статус подписки</div>
-                    <div class="stat-value" id="cab-status" style="color: var(--text-secondary);">Загрузка...</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Истекает</div>
-                    <div class="stat-value" id="cab-expire">--.--.----</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Осталось</div>
-                    <div class="stat-value" id="cab-left">0 дней</div>
-                </div>
-            </div>
-    
-            <div class="key-section">
-                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase;">Ваш ключ доступа:</div>
-                <div class="key-container">
-                    <div class="key-display" id="cab-key">Загрузка...</div>
-                    <button class="copy-button" onclick="copyCabinetKey()">Копировать</button>
-                </div>
-            </div>
-        </div>
-    </div>
         
     <footer>
         <div class="footer-links">
@@ -251,122 +214,7 @@
         </div>
     </div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-    const tg = window.Telegram.WebApp;
-    const API_BASE = "https://zavarka.fun";
-    tg.expand();
-
-    // Функция загрузки данных ключа
-    async function loadKeyData(username, userId) {
-        try {
-            console.log("Отправляем запрос для:", username, userId);
-            const response = await fetch(`/api/user/status?username=${username}&user_id=${userId}`);
-            
-            if (!response.ok) throw new Error("Ошибка соединения с сервером");
-            const data = await response.json();
-
-            const statusEl = document.getElementById('cab-status');
-            const expireEl = document.getElementById('cab-expire');
-            const leftEl = document.getElementById('cab-left');
-            const keyEl = document.getElementById('cab-key');
-
-            if (data.status === 'active') {
-                statusEl.innerText = 'Активна';
-                statusEl.style.color = '#42ed57';
-                keyEl.innerText = data.key_value;
-
-                const now = Math.floor(Date.now() / 1000);
-                const timeLeft = data.expires_at - now;
-
-                if (timeLeft > 0) {
-                    const d = new Date(data.expires_at * 1000);
-                    expireEl.innerText = d.toLocaleDateString('ru-RU') + " " + d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
-                    
-                    const days = Math.floor(timeLeft / 86400);
-                    const hours = Math.floor((timeLeft % 86400) / 3600);
-                    leftEl.innerText = days > 0 ? `${days} дн. ${hours} ч.` : `${hours} ч.`;
-                } else {
-                    setInactiveUI();
-                }
-            } else {
-                setInactiveUI();
-            }
-        } catch (e) {
-            console.error("Сбой API:", e);
-            document.getElementById('cab-key').innerText = "Ошибка загрузки с сервера";
-            setInactiveUI();
-        }
-    }
-
-    function setInactiveUI() {
-        const statusEl = document.getElementById('cab-status');
-        const keyEl = document.getElementById('cab-key');
-        if(statusEl) {
-            statusEl.innerText = 'Неактивна';
-            statusEl.style.color = '#ff4757';
-        }
-        if(keyEl && keyEl.innerText === "Загрузка...") {
-            keyEl.innerText = 'Ключ не найден';
-        }
-        
-        const expireEl = document.getElementById('cab-expire');
-        const leftEl = document.getElementById('cab-left');
-        if(expireEl) expireEl.innerText = '--.--.----';
-        if(leftEl) leftEl.innerText = '0 дней';
-    }
-
-    // Инициализация при открытии приложения
-    window.onload = function() {
-        const user = tg.initDataUnsafe?.user;
-
-        if (user) {
-            // Ставим данные Телеграм
-            document.getElementById('cab-name').innerText = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-            document.getElementById('cab-id').innerText = user.id;
-            
-            const usernameEl = document.getElementById('cab-username');
-            if (user.username) usernameEl.innerText = `@${user.username}`;
-
-            const avatar = document.getElementById('cab-initials');
-            if (user.photo_url) {
-                avatar.innerHTML = `<img src="${user.photo_url}" style="width:100%; height:100%; border-radius:15px; object-fit:cover;">`;
-            } else {
-                avatar.innerText = (user.first_name || "U")[0].toUpperCase();
-            }
-
-            // Идем на сервер питона за ключом
-            loadKeyData(user.username, user.id);
-        } else {
-            console.warn("Открыто вне Telegram");
-            document.getElementById('cab-name').innerText = "Браузер (Тест)";
-            setInactiveUI();
-        }
-    };
-
-    // Копирование ключа
-    function copyCabinetKey() {
-        const key = document.getElementById('cab-key').innerText;
-        if (key && !key.includes('Загрузка') && !key.includes('найден') && !key.includes('Ошибка')) {
-            navigator.clipboard.writeText(key);
-            tg.showAlert("Ключ скопирован!");
-        }
-    }
-
-    // Твоя функция переключения страниц (если она есть в старом коде, оставляем)
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        const targetPage = document.getElementById(pageId);
-        if(targetPage) targetPage.classList.add('active');
-        
-        if (event) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
-    }
-
-    // Инициализация при входе
-    loadCabinet();
-</script>
+</script>  
 </body>
 </html>
