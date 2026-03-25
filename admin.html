@@ -66,34 +66,33 @@
             animation: fadeIn 0.4s ease-in-out; 
         }
 
+        /* Полный стиль для выпадающих списков */
         select {
-            /* 1. Оставляем отступ (текст не наезжает) */
-            padding-right: 40px !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
             
-            /* 2. Оставляем, чтобы скрыть старую стрелку */
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            /* Отступ справа, чтобы текст не касался стрелки */
+            padding-right: 40px !important; 
             
-            /* --- ДОБАВЬ ЭТИ СТРОКИ, ОНИ РИСУЮТ СТРЕЛКУ --- */
-            
-            /* 3. Вставляем картинку (белую галочку) прямо в CSS */
+            /* Рисуем кастомную стрелочку */
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
-            
-            /* 4. Запрещаем картинке повторяться */
             background-repeat: no-repeat !important;
-            
-            /* 5. Позиционируем её: 15px от правого края, по центру по вертикали */
             background-position: right 15px center !important;
-            
-            /* 6. Задаем размер галочки (16px) */
             background-size: 16px !important;
+            
+            /* Базовые стили из твоего конфига */
+            background-color: #0d0706;
+            color: var(--text-main);
+            border: 1px solid #36221c;
+            border-radius: 8px;
+            cursor: pointer;
         }
         
-        /* Для iOS (Safari) исправляем цвет фона при нажатии */
+        /* Фикс для отображения вариантов в темной теме */
         select option {
-            background-color: #0d0706; /* Твой основной темный фон из стилей */
-            color: var(--text-main);
+            background-color: #0d0706;
+            color: white;
         }
         
         .tab-content.active { 
