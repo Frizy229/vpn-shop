@@ -66,26 +66,28 @@
             animation: fadeIn 0.4s ease-in-out; 
         }
 
-                /* Внеси правки в существующий блок или добавь ниже */
         select {
-            /* Добавляем отступ справа, чтобы текст не налезал на стрелку */
+            /* 1. Оставляем отступ (текст не наезжает) */
             padding-right: 40px !important;
             
-            /* Убираем стандартную системную стрелку */
+            /* 2. Оставляем, чтобы скрыть старую стрелку */
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
             
-            /* Рисуем свою красивую стрелочку (белую галочку) */
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
+            /* --- ДОБАВЬ ЭТИ СТРОКИ, ОНИ РИСУЮТ СТРЕЛКУ --- */
             
-            /* Устанавливаем положение стрелки: 15px от правого края, по центру по вертикали */
-            background-position: right 15px center;
-            background-size: 16px;
+            /* 3. Вставляем картинку (белую галочку) прямо в CSS */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
             
-            /* Курсор при наведении */
-            cursor: pointer;
+            /* 4. Запрещаем картинке повторяться */
+            background-repeat: no-repeat !important;
+            
+            /* 5. Позиционируем её: 15px от правого края, по центру по вертикали */
+            background-position: right 15px center !important;
+            
+            /* 6. Задаем размер галочки (16px) */
+            background-size: 16px !important;
         }
         
         /* Для iOS (Safari) исправляем цвет фона при нажатии */
