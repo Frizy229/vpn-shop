@@ -137,42 +137,42 @@
             </div>
         </div>
 
-        <div id="cabinet-page" class="page">
-    <div class="profile-card">
-        <div class="user-info">
-            <div class="user-avatar" id="cab-user-avatar">U</div>
-            <div style="display: flex; flex-direction: column; justify-content: center;">
-                <div id="cab-user-name" style="font-weight: bold; font-size: 18px; color: white;">Загрузка...</div>
-                <div id="cab-user-username" style="font-size: 13px; color: var(--accent-gold);"></div>
-                <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="cab-user-id">000000</span></div>
+            <div id="cabinet-page" class="page active">
+        <div class="profile-card">
+            <div class="user-info">
+                <div class="user-avatar" id="cab-initials">U</div>
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <div id="cab-name" style="font-weight: bold; font-size: 18px; color: white;">Загрузка...</div>
+                    <div id="cab-username" style="font-size: 13px; color: var(--accent-gold); margin-bottom: 2px;"></div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">ID: <span id="cab-id">000000</span></div>
+                </div>
             </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Статус</div>
-                <div class="stat-value" id="cab-sub-status" style="color: var(--text-secondary);">Загрузка...</div>
+    
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Статус подписки</div>
+                    <div class="stat-value" id="cab-status" style="color: var(--text-secondary);">Загрузка...</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Истекает</div>
+                    <div class="stat-value" id="cab-expire">--.--.----</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Осталось</div>
+                    <div class="stat-value" id="cab-left">0 дней</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Истекает</div>
-                <div class="stat-value" id="cab-expire-date">--.--.----</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Осталось</div>
-                <div class="stat-value" id="cab-days-left">0 дней</div>
-            </div>
-        </div>
-
-        <div class="key-section">
-            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase;">Ваш ключ доступа:</div>
-            <div class="key-container">
-                <div class="key-display" id="cab-vpn-key">Поиск ключа...</div>
-                <button class="copy-button" onclick="copyCabinetKey()">Копировать</button>
+    
+            <div class="key-section">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase;">Ваш ключ доступа:</div>
+                <div class="key-container">
+                    <div class="key-display" id="cab-key">Загрузка...</div>
+                    <button class="copy-button" onclick="copyCabinetKey()">Копировать</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
+        
     <footer>
         <div class="footer-links">
             <a onclick="openModal('modal-offer')">Оферта</a>
@@ -256,16 +256,19 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Функция загрузки данных ключа с сервера
-    async function fetchCabinetData(username, userId) {
+    // Функция загрузки данных ключа
+    async function loadKeyData(username, userId) {
         try {
+            console.log("Отправляем запрос для:", username, userId);
             const response = await fetch(`/api/user/status?username=${username}&user_id=${userId}`);
+            
+            if (!response.ok) throw new Error("Ошибка соединения с сервером");
             const data = await response.json();
 
-            const statusEl = document.getElementById('cab-sub-status');
-            const expireEl = document.getElementById('cab-expire-date');
-            const leftEl = document.getElementById('cab-days-left');
-            const keyEl = document.getElementById('cab-vpn-key');
+            const statusEl = document.getElementById('cab-status');
+            const expireEl = document.getElementById('cab-expire');
+            const leftEl = document.getElementById('cab-left');
+            const keyEl = document.getElementById('cab-key');
 
             if (data.status === 'active') {
                 statusEl.innerText = 'Активна';
@@ -283,63 +286,82 @@
                     const hours = Math.floor((timeLeft % 86400) / 3600);
                     leftEl.innerText = days > 0 ? `${days} дн. ${hours} ч.` : `${hours} ч.`;
                 } else {
-                    setCabinetInactive();
+                    setInactiveUI();
                 }
             } else {
-                setCabinetInactive();
+                setInactiveUI();
             }
         } catch (e) {
-            console.error("Ошибка API:", e);
-            document.getElementById('cab-vpn-key').innerText = "Ошибка сервера";
+            console.error("Сбой API:", e);
+            document.getElementById('cab-key').innerText = "Ошибка загрузки с сервера";
+            setInactiveUI();
         }
     }
 
-    function setCabinetInactive() {
-        document.getElementById('cab-sub-status').innerText = 'Неактивна';
-        document.getElementById('cab-sub-status').style.color = '#ff4757';
-        document.getElementById('cab-expire-date').innerText = '--.--.----';
-        document.getElementById('cab-days-left').innerText = '0 дней';
-        document.getElementById('cab-vpn-key').innerText = 'Ключ не найден';
+    function setInactiveUI() {
+        const statusEl = document.getElementById('cab-status');
+        const keyEl = document.getElementById('cab-key');
+        if(statusEl) {
+            statusEl.innerText = 'Неактивна';
+            statusEl.style.color = '#ff4757';
+        }
+        if(keyEl && keyEl.innerText === "Загрузка...") {
+            keyEl.innerText = 'Ключ не найден';
+        }
+        
+        const expireEl = document.getElementById('cab-expire');
+        const leftEl = document.getElementById('cab-left');
+        if(expireEl) expireEl.innerText = '--.--.----';
+        if(leftEl) leftEl.innerText = '0 дней';
     }
 
-    // Инициализация данных Телеграм
-        window.onload = function() {
-        console.log("WebApp инициализирован"); // Увидим в консоли, если есть доступ
-        
-        // Проверяем, есть ли данные от Телеграм
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const u = tg.initDataUnsafe.user;
+    // Инициализация при открытии приложения
+    window.onload = function() {
+        const user = tg.initDataUnsafe?.user;
+
+        if (user) {
+            // Ставим данные Телеграм
+            document.getElementById('cab-name').innerText = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            document.getElementById('cab-id').innerText = user.id;
             
-            // Заполняем данные пользователя
-            const nameEl = document.getElementById('cab-user-name');
-            if (nameEl) nameEl.innerText = `${u.first_name || ''} ${u.last_name || ''}`.trim();
-            
-            const idEl = document.getElementById('cab-user-id');
-            if (idEl) idEl.innerText = u.id;
-    
-            // Загружаем данные с сервера
-            fetchCabinetData(u.username, u.id);
+            const usernameEl = document.getElementById('cab-username');
+            if (user.username) usernameEl.innerText = `@${user.username}`;
+
+            const avatar = document.getElementById('cab-initials');
+            if (user.photo_url) {
+                avatar.innerHTML = `<img src="${user.photo_url}" style="width:100%; height:100%; border-radius:15px; object-fit:cover;">`;
+            } else {
+                avatar.innerText = (user.first_name || "U")[0].toUpperCase();
+            }
+
+            // Идем на сервер питона за ключом
+            loadKeyData(user.username, user.id);
         } else {
-            // Если зашли через браузер — ставим тестовые данные, чтобы не висела загрузка
-            console.warn("Данные Telegram не найдены. Использую тестовый режим.");
-            document.getElementById('cab-user-name').innerText = "Тестовый Пользователь";
-            document.getElementById('cab-user-id').innerText = "12345678";
-            setCabinetInactive(); // Показывает "Ключ не найден" вместо бесконечной загрузки
+            console.warn("Открыто вне Telegram");
+            document.getElementById('cab-name').innerText = "Браузер (Тест)";
+            setInactiveUI();
         }
     };
 
+    // Копирование ключа
     function copyCabinetKey() {
-        const key = document.getElementById('cab-vpn-key').innerText;
-        if (key && !key.includes('...')) {
+        const key = document.getElementById('cab-key').innerText;
+        if (key && !key.includes('Загрузка') && !key.includes('найден') && !key.includes('Ошибка')) {
             navigator.clipboard.writeText(key);
             tg.showAlert("Ключ скопирован!");
         }
     }
 
-    // Твоя функция переключения страниц (если она есть)
+    // Твоя функция переключения страниц (если она есть в старом коде, оставляем)
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
+        const targetPage = document.getElementById(pageId);
+        if(targetPage) targetPage.classList.add('active');
+        
+        if (event) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
     }
 </script>
 </body>
