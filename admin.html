@@ -252,7 +252,25 @@
         if(tabId === 'history') loadHistory();
     }
 
-   // Добавление ключей
+document.addEventListener('DOMContentLoaded', () => {
+    const typeSelect = document.getElementById('subscriptionType');
+    const prefixInput = document.getElementById('keyPrefix');
+
+    const prefixes = {
+        'trial': 'Zavarka_Trial_',
+        '1_month': 'Zavarka_1mec_',
+        '3_months': 'Zavarka_3mec_',
+        '6_months': 'Zavarka_6mec_',
+        '1_year': 'Zavarka_1god_'
+    };
+
+    typeSelect.addEventListener('change', () => {
+        if (prefixes[typeSelect.value]) {
+            prefixInput.value = prefixes[typeSelect.value];
+        }
+    });
+});
+    // Добавление ключей
 async function syncKeys() {
     const prefix = document.getElementById('keyPrefix').value.trim();
     // ИСПРАВЛЕНО: берем значение из subscriptionType, а не keyType
